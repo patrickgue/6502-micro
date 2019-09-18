@@ -1,0 +1,7 @@
+	.pc $0200
+	LDA #$03
+	STA $00
+	DEC $00
+	BEQ $03
+	JMP $0204
+	BRK

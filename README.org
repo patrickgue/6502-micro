@@ -1,0 +1,69 @@
+#+TITLE:Emulator and Assembler for 6502-based Microcomputer Project
+
+* Description and History
+
+2019-09-18
+
+I came up with the idea of building my own 6502 based microcomputer. But I 
+decided, that, before ordering any parts and trying to assemble it, I should
+get familiar with all the different components. And not just on a surface level,
+but in the greatest detail possible.
+
+And this wasn't a bad idea. After only a few days working on it and only writing
+a tiny part of the emulation I already learned a lot.
+
+
+* The Emulator
+
+The emulator is based on the 6502 microprocesser emulator and /Zeta/ header 
+library by /Manuel Sainz de Baranda y Goñi/([https://github.com/redcode/6502], 
+https://github.com/redcode/Z). The emulator is currently quite simple. In 
+addition of a wrapper for the CPU emulator I've implemented a small tool 
+which can load programs into memory before the system is started. Also there's 
+a small debuger.
+
+* The Assembler
+
+After struggling using different assemblers I decided, to start writing a new 
+one. I did this mainly for two reasons; The ones I used initialy (xa65, cc65)
+were either too buggy or too complex for what I tried to achieve. Also, by
+completely writing an assembler from scratch, I can have full controll on how
+it operates, what features it has and how I can integrate it into my Project
+as a whole.
+
+
+* Distribution
+
+** All code and documents except ./include and ./libsrc
+
+#+BEGIN_CODE
+Copyright (C) 2019 Patrick Günthard
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+#+END_CODE
+
+** All code in the directories ./include and ./libsrc
+
+#+BEGIN_CODE
+Copyright (C) 1999-2018 Manuel Sainz de Baranda y Goñi.
+
+This emulator is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published  by the Free Software
+Foundation, either  version 3 of  the License, or  (at your option)  any later
+version.
+
+This emulator is distributed  in the hope that it will  be useful, but WITHOUT
+ANY WARRANTY; without even the  implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received  a copy of the GNU General Public License  along with
+this emulator. If not, see <http://www.gnu.org/licenses/>.
+#+END_CODE
