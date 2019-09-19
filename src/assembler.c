@@ -176,7 +176,7 @@ size_t construct_binopt(char line[64], uint8_t **bytes) {
     char *tofree;
     tofree = strdup(line);
     cmd = strsep(&line, " ");
-    bool force_word = is_force_word_op(cmd);;
+    bool force_word = is_force_word_op(cmd);
     addr_info = calc_addressing_information(line, force_word);
     if(is_relative_addr_op(cmd)) {
       addr_info.mode = relative;
