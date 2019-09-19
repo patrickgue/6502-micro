@@ -1,0 +1,53 @@
+#+TITLE:Assembly Syntax
+
+* General
+
+The assembler follows the default 6502 assembly format with certain additions.
+All 56 opcodes are available.
+
+* Adressing modes
+
+The default adressing modes are available:
+#+BEGIN_SRC
+absolute             OPC $LLHH 
+absolute, X-indexed  OPC $LLHH,X
+absolute, Y-indexed  OPC $LLHH, Y
+immediate            OPC #$BB
+implied              OPC
+indirect             OPC $(LLHH)
+X-indexed, indirect  OPC ($LL,X) 
+indirect, Y-indexed  OPC ($LL),Y
+relative             OPC $BB
+zeropage             OPC $LL
+zeropage, X-indexed  OPC $LL,X
+zeropage, Y-indexed  OPC $LL,Y
+accumlator           OPC
+#+END_SRC
+
+
+* Pseudo-ops
+
+** .pc
+
+This opcodes sets the program counter. Must be defined on a single line.
+
+#+BEGIN_SRC
+.pc $LLHH
+#+END_SRC
+
+* Labels
+
+Labels are defined as following and must be defined on a seperate line:
+
+#+BEGIN_SRC
+labelname:
+    ...
+#+END_SRC
+
+
+They can be accessed in the code using square brackets:
+
+#+BEGIN_SRC
+    OPC [labelname]
+#+END_SRC
+
