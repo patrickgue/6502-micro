@@ -40,9 +40,10 @@ zpg,Y		....	zeropage, Y-indexed	OPC $LL,Y	 	operand is zeropage address; effecti
 
 enum e_line_type {
   operation = 0,
-  lbl = 1,
-  pseudoop = 2,
-  skip
+  op_with_label = 1,
+  lbl = 2,
+  pseudoop = 3,
+  skip = 4
 };
 
 typedef enum e_line_type line_type;
@@ -83,6 +84,8 @@ typedef struct s_opcode opcode;
 struct s_label {
   char labelname[16];
   uint16_t pc;
+  size_t size;
+  bool rel;
 };
 
 typedef struct s_label label;
@@ -96,6 +99,8 @@ uint16_t parse_number(char [], addressing_mode);
 line_type get_line_type(char line[]);
 
 void add_label(char*, uint16_t);
+
+char *add_label_reference(char*, uint16_t);
 
 uint8_t * link(uint8_t *memory, label *labels);
 
@@ -237,14 +242,22 @@ static uint8_t opcode_table[56][13] =
 static char implied_ops [25][4] = {"BRK", "RTI", "PHP", "CLC", "PLP", "SEC", "PHA", "CLI", "PLA", "SEI", "DEY", "TYA", "TAY", "CLV", "INY", "CLD", "INX", "SED", "TXA", "TXS", "TAX", "TSX", "DEX", "NOP"};
 static int implied_ops_count = 25;
 
+bool is_implied_addr_op(char *);
+
 static char accum_ops [4][4] = {"ASL", "ROL", "LSR", "ROR"};
 static int accum_ops_count = 4;
+
+bool is_accum_addr_op(char *);
 
 static char relative_ops[8][4] = {"BPL", "BMI", "BVC", "BVS", "BCC", "BCS", "BNE", "BEQ"};
 static int relative_ops_count = 8;
 
+bool is_relative_addr_op(char *);
+
 static char force_word_ops[1][4] = {"JMP"};
-static int force_word_ops_size = 1;
+static int force_word_ops_count = 1;
+
+bool is_force_word_op(char*);
 
 static int op_address_size[13] = {3,3,3,2,1,3,3,1,2,2,1};
 

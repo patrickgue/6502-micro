@@ -32,6 +32,9 @@ void test()
 
 label *labels;
 int labels_count = 0;
+
+label *label_references;
+int label_references_count;
   
 
 int main(int argc, char **argv) {
@@ -54,6 +57,7 @@ int main(int argc, char **argv) {
   char *tofree, *op;
   
   labels = malloc(0);
+  label_references = malloc(0);
   
   if(assembly_code_size == 0)
     return 1;
@@ -64,9 +68,17 @@ int main(int argc, char **argv) {
     line = trim(line);
     printf("\"%s\"\n", line);
     size_t op_size;
-    switch(get_line_type(line)) {
+    line_type current_line_type = get_line_type(line);
+    switch(current_line_type) {
+    case op_with_label:
     case operation:
-      printf("op: ");
+      printf(""); /* without this line a segfault occurs. TODO: find out why 
+		     because both the segfault and the fix make absolutely no 
+		     sense */
+      if(current_line_type == op_with_label) {
+	strcpy(line, add_label_reference(line, program_counter));
+      }
+
       op_size = construct_binopt(line, &bytes);
     
       printf("(%zu) %02x ", op_size, bytes[0]);
@@ -87,14 +99,53 @@ int main(int argc, char **argv) {
       op = strsep(&line, " ");
       if(strcmp(op, ".pc") == 0) {
 	 program_counter = parse_number(line, absolute);
-	 if(!pc_offset_set)
+	 if(!pc_offset_set) {
 	   pc_offset = program_counter;
+	   pc_offset_set = true;
+	 }
       }
+      break;
+    case lbl:
+      add_label(line, program_counter);
+    case skip:
       break;
     }
     
   }
 
+
+  /* inject label references */
+  for(int i = 0; i < label_references_count; i++) {
+    for(int j = 0; j < labels_count; j++) {
+      if(strcmp(label_references[i].labelname, labels[j].labelname) == 0) {
+	if(label_references[i].rel) {
+	  /* signed */ int8_t b = (int8_t) ((labels[j].pc - label_references[i].pc - 2) & 0x00ff);
+	  buffer[label_references[i].pc + 1] = b;
+	}
+	else {
+	   buffer[label_references[i].pc + 1] = (labels[j].pc & 0x00ff);
+	   buffer[label_references[i].pc + 2] = (labels[j].pc & 0xff00) >> 8;
+	}
+      }
+    }
+  }
+  
+  printf("Labels:\n");
+  for(int i = 0; i < labels_count; i++) {
+    printf("%04x %s\n", labels[i].pc, labels[i].labelname);
+  }
+
+  printf("\nLabel references:\n");
+  for(int i = 0; i < label_references_count; i++) {
+    printf("%04x %s %zu %s\n",
+	   label_references[i].pc,
+	   label_references[i].labelname,
+	   label_references[i].size,
+	   label_references[i].rel ? "rel" : "abs");
+  }
+
+
+  printf("\nProgram:\n");
   for(int i = pc_offset; i < program_counter; i++) {
     printf("%04x %02x\n", i, buffer[i]);
   }
@@ -125,14 +176,10 @@ size_t construct_binopt(char line[64], uint8_t **bytes) {
     char *tofree;
     tofree = strdup(line);
     cmd = strsep(&line, " ");
-    bool force_word = false;
-    for(int i = 0; i < force_word_ops_size; i++)
-      if(strcmp(force_word_ops[i], cmd) == 0) force_word = true;
+    bool force_word = is_force_word_op(cmd);;
     addr_info = calc_addressing_information(line, force_word);
-    for(int i = 0; i < relative_ops_count; i++) {
-      if(strcmp(cmd, relative_ops[i]) == 0) {
-	addr_info.mode = relative;
-      }
+    if(is_relative_addr_op(cmd)) {
+      addr_info.mode = relative;
     }
   }
 
@@ -290,19 +337,106 @@ line_type get_line_type(char line[64]) {
   if(contains_single(line, ':')) {
     return lbl;
   }
+  if(contains(line, "[]")) {
+    return op_with_label;
+  }
   return operation;
 }
 
+bool is_implied_addr_op(char *cmd) {
+  for(int i = 0; i < implied_ops_count; i++) {
+    if(strcmp(cmd, implied_ops[i]) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool is_accum_addr_op(char *cmd) {
+  for(int i = 0; i < accum_ops_count; i++) {
+    if(strcmp(cmd, accum_ops[i]) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool is_relative_addr_op(char *cmd) {
+  for(int i = 0; i < relative_ops_count; i++) {
+    if(strcmp(cmd, relative_ops[i]) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool is_force_word_op(char *cmd) {
+  for(int i = 0; i < force_word_ops_count; i++) {
+    if(strcmp(cmd, force_word_ops[i]) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void add_label(char *line, uint16_t pc) {
   char *ln = malloc(strlen(line));
   strcpy(ln, line);
+  ln[strlen(ln)-1] = '\0';
+
+  for(int i = 0; i < labels_count; i++) {
+    if(strcmp(labels[i].labelname, ln) == 0 && labels[i].pc != pc) {
+      printf("Error: Label already defined\n");
+      return;
+    }
+  }
+  
   labels = realloc(labels, (labels_count+1) * sizeof(label));
   labels[labels_count].pc = pc;
   strcpy(labels[labels_count].labelname, ln);
   free(ln);
   labels_count++;
 }
+
+char* add_label_reference(char *line, uint16_t pc) {
+  char *ln = malloc(strlen(line));
+  char *tofree, *number_str, *output;
+  uint16_t address;
+  label new_reference_label = {};
+  strcpy(ln, line); 
+  tofree = strdup(ln);
+
+  char *cmd = strsep(&ln, " ");
+  
+  /* remove brackets */
+  ln++;
+  ln[strlen(ln)-1] = '\0';
+
+  strcpy(new_reference_label.labelname, ln);
+  new_reference_label.pc = pc;
+
+  if(is_relative_addr_op(cmd)) {
+    new_reference_label.rel = true;
+    new_reference_label.size = 1;
+    output = malloc(8);
+    sprintf(output, "%s $00", cmd);
+  }
+  else {
+    new_reference_label.rel = false;
+    new_reference_label.size = 2;
+    output = malloc(10);
+    sprintf(output, "%s $0000", cmd);
+  }
+
+  label_references = realloc(label_references, ++label_references_count);
+  label_references[label_references_count-1] = new_reference_label;
+
+  free(tofree);
+
+  return output;
+}
+
+
 
 
 uint8_t * link(uint8_t *memory, label *labels) {
