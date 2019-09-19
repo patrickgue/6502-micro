@@ -35,13 +35,31 @@ void load_rom(char filename[64], zuint8 * memory)
   char *line_token, *filecontents, *word_token, *tofree_contents, *tofree_line;
 
   readfile(&filecontents, filename, false);
-  printf("Success reading file ");//(%s)", filecontents);
   tofree_contents = strdup(filecontents);
+
+
+
+  line_token = strsep(&filecontents, "\n");
+  zuint16 nmi_vector = strtol(line_token, NULL, 16);
+  memory[0xfffa] = nmi_vector & 0x00ff;
+  memory[0xfffb] = (nmi_vector & 0xff00) >> 8;
+
+  printf("NMI   Vector: %04x\n", nmi_vector);
 
   line_token = strsep(&filecontents, "\n");
   zuint16 reset_vector = strtol(line_token, NULL, 16);
   memory[0xfffc] = reset_vector & 0x00ff;
   memory[0xfffd] = (reset_vector & 0xff00) >> 8;
+
+  printf("RESET Vector: %04x\n", reset_vector);
+  
+  line_token = strsep(&filecontents, "\n");
+  zuint16 irq_vector = strtol(line_token, NULL, 16);
+  memory[0xfffe] = irq_vector & 0x00ff;
+  memory[0xffff] = (irq_vector & 0xff00) >> 8;
+
+  printf("IRQ   Vector: %04x\n", irq_vector);
+
   
   while((line_token = strsep(&filecontents, "\n")) != NULL) {
     tofree_line = strdup(line_token);
@@ -56,7 +74,7 @@ void load_rom(char filename[64], zuint8 * memory)
       zusize progsize = readfile((char**)&code, filename, true);
       zuint16 addr_int = strtol(addr, NULL, 16);
       for(int i = addr_int; i < addr_int + progsize; i++) {
-	printf("%04x %02x\n", i, code[i-addr_int]);
+	//printf("%04x %02x\n", i, code[i-addr_int]);
 	if(i > 0 && i <= 0xffff) {
 	  memory[i] = code[i-addr_int];
 	}
@@ -68,5 +86,4 @@ void load_rom(char filename[64], zuint8 * memory)
     }
   }
   free(tofree_contents);
-  printf("done loading fake rom\n");
 }

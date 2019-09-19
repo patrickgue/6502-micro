@@ -58,6 +58,7 @@ int main(int argc, char **argv)
   cpu->read = &bus_read;
   cpu->write = &bus_write;
   m6502_power(cpu, TRUE);
+  m6502_irq(cpu, false);
   m6502_reset(cpu);
 
   while(loop == true) {
@@ -112,6 +113,11 @@ bool debug(char str[64]) {
   }
   else if(strcmp(cmd, "irq\n") == 0) {
     m6502_irq(cpu, true);
+    m6502_irq(cpu, true);
+    return true;
+    }
+  else if(strcmp(cmd, "nmi\n") == 0) {
+    m6502_nmi(cpu);
     return true;
   }
   else if(strcmp(cmd, "n\n") == 0) {

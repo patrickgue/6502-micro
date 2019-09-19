@@ -40,7 +40,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.\n\n\
 zusize readfile(char **string, char path[64], bool binary)
 {
   FILE *f;
-  printf("begin reading file %s\n", path);
 
   if(binary) {
     f = fopen(path, "rb");

@@ -1,3 +1,5 @@
+ffa0
 ff80
+ffc0
 0200:./bin/testprog.o65
 ff80:./bin/loader.o65
