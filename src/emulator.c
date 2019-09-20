@@ -28,109 +28,39 @@
 #include "helper.h"
 #include "emulator.h"
 
-#define CLOCKSPEED  2000000 // 2MHz
-
-zuint8 *memory; 
-M6502 *cpu;
-bool loop = true;
-
 
 zuint8 bus_read(void *context, zuint16 address)
 {
-  printf("r 0x%04x 0x%02x\n", address, memory[address]);
-  return memory[address];
+  emulator_state *state = (emulator_state*) context;
+  state->debug_read(address,state->memory[address]);
+  return state->memory[address];
 }
 
 void bus_write(void *context, zuint16 address, zuint8 value) {
-  memory[address] = value;
-  printf("w 0x%04x 0x%02x\n", address, value);
+  emulator_state *state = (emulator_state*) context;
+  state->debug_write(address,state->memory[address]);
+  state->memory[address] = value;
 }
 
 
-int main(int argc, char **argv)
+void init_emulator(emulator_state **state, long clockspeed)
 {
-  welcome("emulator");
-  memory = (zuint8*) malloc(256 * 256 * sizeof(zuint8));
-
-  load_rom("bin/loadrom.tbl",memory);
   
-  cpu = (M6502*) malloc(sizeof(M6502));
-  cpu->read = &bus_read;
-  cpu->write = &bus_write;
-  m6502_power(cpu, TRUE);
-  m6502_irq(cpu, false);
-  m6502_reset(cpu);
+  *state = malloc(sizeof(emulator_state));
+  (*state)->memory = (zuint8*) malloc(0x10000 * sizeof(zuint8));
 
-  while(loop == true) {
-    zusize cycles =  m6502_run(cpu, 1);
-    if(argc > 1 && strcmp(argv[1], "-s") == 0) {
-      bool wait = true;
+  load_rom("bin/loadrom.tbl",(*state)->memory);
 
-      while(wait) {
-	char dbstr[64];
-	printf("dbg: ");
-	fgets(dbstr, 64, stdin);
-	wait = debug(dbstr);
-      }
-    }
-    else {
-      usleep(cycles * (1000000 / CLOCKSPEED));
-    }
-  }
-
-  printf("0x%02x\n", memory[0x0800]);
-  
-  return 0;
+  (*state)->clockspeed = clockspeed;
+  (*state)->cpu = (M6502*) malloc(sizeof(M6502));
+  (*state)->cpu->read = &bus_read;
+  (*state)->cpu->write = &bus_write;
+  (*state)->cpu->context = *state;
 }
 
 
-bool debug(char str[64]) {
-  if(strlen(str) == 0)
-    return false;
-
-  char *to_free;
-  to_free = strdup(str);
-
-  char *cmd = strsep(&str, " ");
-  if(strcmp(cmd, "mem") == 0) {
-    zuint16 addr = strtol(str, NULL, 16);
-    printf("%02x\n", memory[addr]);
-    return true;
-  }
-  else if(strcmp(cmd, "state\n") == 0) {
-    printf("Registers\nA: %02x  X: %02x  Y: %02x  PC: %04x \nFlags\n",
-	   cpu->state.a, cpu->state.x, cpu->state.y, cpu->state.pc);
-    printf("| N | V |   | B | D | I | Z | C |\n  %d   %d       %d   %d\
-   %d   %d   %d\n",
-	   (cpu->state.p & 0b10000000) >> 7,
-	   (cpu->state.p & 0b01000000) >> 6,
-	   (cpu->state.p & 0b00010000) >> 4,
-	   (cpu->state.p & 0b00001000) >> 3,
-	   (cpu->state.p & 0b00000100) >> 2,
-	   (cpu->state.p & 0b00000010) >> 1,
-	   (cpu->state.p & 0b00000001));
-    return true;
-  }
-  else if(strcmp(cmd, "irq\n") == 0) {
-    m6502_irq(cpu, true);
-    m6502_irq(cpu, true);
-    return true;
-    }
-  else if(strcmp(cmd, "nmi\n") == 0) {
-    m6502_nmi(cpu);
-    return true;
-  }
-  else if(strcmp(cmd, "n\n") == 0) {
-    return false;
-  }
-  else if(strcmp(cmd, "halt\n") == 0) {
-    loop = false;
-    return false;
-  }
-  else if(strcmp(cmd, "reset\n") == 0) {
-    m6502_reset(cpu);
-    return false;
-  }
-
-  return false;
+size_t exec_cpu_cycle(emulator_state **state) {
+  zusize cycles =  m6502_run((*state)->cpu, 1);
+  usleep(cycles * (1000000 / (*state)->clockspeed));
+  return cycles;
 }

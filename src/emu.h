@@ -1,5 +1,5 @@
 /*
-  emulator.h  header file for emulator.c
+  emu.h  header file for emu.c
   Copyright (C) 2019 Patrick Günthard
 
   This program is free software: you can redistribute it and/or modify
@@ -16,28 +16,16 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef EMULATOR_H
-#define EMULATOR_H
+#ifndef EMU_H
+#define EMU_H
 
+#include <stdbool.h>
+#include <string.h>
 
-#include <emulation/CPU/6502.h>
-#include <stdint.h>
+#include "emulator.h"
 
+bool debug(emulator_state*, char[]);
 
-struct s_emulator_state {
-  zuint8 *memory;
-  M6502 *cpu;
-  long clockspeed;
-  void (*debug_read)(uint16_t, uint8_t);
-  void (*debug_write)(uint16_t, uint8_t);
-};
-
-typedef struct s_emulator_state emulator_state;
-
-
-void init_emulator(emulator_state**, long);
-
-size_t exec_cpu_cycle(emulator_state **);
 
 
 #endif

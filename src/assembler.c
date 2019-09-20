@@ -215,6 +215,12 @@ addressing_information calc_addressing_information(char number[18], bool force_w
     else
       mode = zeropage;
   }
+  else if(!contains(number, "()#") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
+    if(contains_single(number, 'X'))
+	mode = absolute_x;
+      else if(contains_single(number, 'Y'))
+	mode = absolute_y;
+  }
   else if(contains(number, "#"))
     mode = immediate;
   else if(contains(number, "()") && !contains_single(number, ','))

@@ -20,12 +20,9 @@ nmi_handler:
 	
 	.pc $ffc0
 irq_handler:
-	PHA
-	PHP
+	SEI
 
 	INC $81
 	
-	PLP
-	PLA
 	RTI
 	

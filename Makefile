@@ -23,27 +23,36 @@ CC=clang
 XA=./bin/as65
 #CC65=cl65
 
-TARGET_EMU="bin/emulator"
+TARGET_EMU="bin/emu"
+EMU_CFLAGS=
+
+TARGET_NEMU="bin/nemu"
+NEMU_CFLAGS=-lncurses
 TARGET_ASM="bin/as65"
 
-SRCS_EMU=src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
+SRCS_EMU=src/emu.c src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
+SRCS_NEMU=src/nemu.c src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
 SRCS_ASM=src/assembler.c src/helper.c
 
 SYSSRCS=src/system/loader.s src/system/testprog.s
 #SYSSRCS_C=src/system/testprogram.c
 
 OBJS_EMU=$(SRCS_EMU:.c=.o)
+OBJS_NEMU=$(SRCS_NEMU:.c=.o)
 OBJS_ASM=$(SRCS_ASM:.c=.o)
 
 SYSOBJS=$(SYSSRCS:.s=.o65)
 #SYSOBJS_C=$(SYSSRCS_C:.c=.o65)
 
-all:$(TARGET_EMU) $(TARGET_ASM) $(SYSOBJS) #$(SYSOBJS_C)
+all:$(TARGET_EMU) $(TARGET_NEMU) $(TARGET_ASM) $(SYSOBJS) #$(SYSOBJS_C)
 	cp $(SYSOBJS) src/system/loadrom.tbl ./bin
 
 $(TARGET_EMU):$(OBJS_EMU) 
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(EMU_CFLAGS) -o $@ $^
 
+
+$(TARGET_NEMU):$(OBJS_NEMU)
+	$(CC) $(CFLAGS) $(NEMU_CFLAGS) -o $@ $^
 
 
 
