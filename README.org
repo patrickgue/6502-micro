@@ -19,8 +19,14 @@ The emulator is based on the 6502 microprocesser emulator and /Zeta/ header
 library by /Manuel Sainz de Baranda y Goñi/([https://github.com/redcode/6502], 
 https://github.com/redcode/Z). The emulator is currently quite simple. In 
 addition of a wrapper for the CPU emulator I've implemented a small tool 
-which can load programs into memory before the system is started. Also there's 
-a small debuger.
+which can load programs into memory before the system is started. 
+
+There's a debugger implemented as a ncurses based TUI:
+
+[[./screenshot.png]]
+
+
+
 
 * The Assembler
 
