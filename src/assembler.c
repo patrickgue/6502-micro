@@ -69,12 +69,10 @@ int main(int argc, char **argv) {
     printf("\"%s\"\n", line);
     size_t op_size;
     line_type current_line_type = get_line_type(line);
+    //printf("%d\n", current_line_type);
     switch(current_line_type) {
     case op_with_label:
     case operation:
-      printf(""); /* without this line a segfault occurs. TODO: find out why 
-		     because both the segfault and the fix make absolutely no 
-		     sense */
       if(current_line_type == op_with_label) {
 	strcpy(line, add_label_reference(line, program_counter));
       }
@@ -159,7 +157,7 @@ int main(int argc, char **argv) {
 
 
 size_t construct_binopt(char line[64], uint8_t **bytes) {
-  char *cmd;
+  char *cmd = malloc(4);
   addressing_information addr_info = {0, 0, 0};
   if(!contains_single(line, ' ')) {
     strcpy(cmd, line);
