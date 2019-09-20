@@ -23,7 +23,7 @@ which can load programs into memory before the system is started.
 
 There's a debugger implemented as a ncurses based TUI:
 
-[[./screenshot.png]]
+[[./doc/screenshot.png]]
 
 
 
