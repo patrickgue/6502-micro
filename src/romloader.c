@@ -39,7 +39,7 @@ void load_rom(char filename[64], zuint8 * memory)
 
 
 
-  line_token = strsep(&filecontents, "\n");
+  /*line_token = strsep(&filecontents, "\n");
   zuint16 nmi_vector = strtol(line_token, NULL, 16);
   memory[0xfffa] = nmi_vector & 0x00ff;
   memory[0xfffb] = (nmi_vector & 0xff00) >> 8;
@@ -58,7 +58,7 @@ void load_rom(char filename[64], zuint8 * memory)
   memory[0xfffe] = irq_vector & 0x00ff;
   memory[0xffff] = (irq_vector & 0xff00) >> 8;
 
-  printf("IRQ   Vector: %04x\n", irq_vector);
+  printf("IRQ   Vector: %04x\n", irq_vector);*/
 
   
   while((line_token = strsep(&filecontents, "\n")) != NULL) {

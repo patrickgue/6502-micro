@@ -32,7 +32,7 @@ TARGET_ASM="bin/as65"
 
 SRCS_EMU=src/emu.c src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
 SRCS_NEMU=src/nemu.c src/disassembler.c src/nemu_debug.c src/emulator.c src/romloader.c src/helper.c  libsrc/6502.c
-SRCS_ASM=src/assembler.c src/helper.c
+SRCS_ASM=src/assembler.c src/disassembler.c src/helper.c
 
 SYSSRCS=src/system/loader.s src/system/testprog.s
 #SYSSRCS_C=src/system/testprogram.c

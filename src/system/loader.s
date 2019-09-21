@@ -26,3 +26,12 @@ irq_handler:
 	
 	RTI
 	
+
+
+	.pc $fffa
+nmi_vector:	
+	.word $ffa0
+reset_vector:	
+	.word $ff80
+irq_vector:	
+	.word $ffc0

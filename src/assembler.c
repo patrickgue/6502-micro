@@ -21,8 +21,11 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "assembler.h"
 #include "helper.h"
+#include "disassembler.h"
+
+#include "assembler.h"
+
 
 void test()
 {
@@ -49,7 +52,7 @@ int main(int argc, char **argv) {
   char *assembly_code, *code_tf, *line;
   size_t assembly_code_size = readfile(&assembly_code, argv[1], false);
 
-  uint16_t program_counter = 0;
+  uint32_t program_counter = 0;
   uint16_t pc_offset = 0;
   bool pc_offset_set = false;
   uint8_t *buffer = (uint8_t*) malloc(0);;
@@ -102,9 +105,20 @@ int main(int argc, char **argv) {
 	   pc_offset_set = true;
 	 }
       }
+      else if(strcmp(op, ".byte") == 0) {
+	buffer[program_counter] = parse_number(line, zeropage);
+	program_counter++;
+      }
+      else if(strcmp(op, ".word") == 0) {
+	buffer[program_counter] = (parse_number(line, absolute) & 0x00ff);
+	buffer[program_counter + 1] = (parse_number(line, absolute) & 0xff00) >> 8;
+	program_counter += 2;
+	
+      }
       break;
     case lbl:
       add_label(line, program_counter);
+      break;
     case skip:
       break;
     }
@@ -143,10 +157,16 @@ int main(int argc, char **argv) {
   }
 
 
-  printf("\nProgram:\n");
-  for(int i = pc_offset; i < program_counter; i++) {
-    printf("%04x %02x\n", i, buffer[i]);
-  }
+  printf("\nProgram (disassembled)\n");
+  uint32_t i = pc_offset, pc_add;
+  
+  do {
+    char *line;
+    pc_add = disassemble_line(&line, buffer, i, false);
+    printf("%s\n", line);
+    i += pc_add;
+    free(line);
+  } while( pc_add != 0);
 
   FILE *f = fopen(argv[2], "wb");
   fwrite(buffer + pc_offset, 1, program_counter - pc_offset , f);

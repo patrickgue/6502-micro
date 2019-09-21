@@ -7,7 +7,7 @@
 #include "assembler.h"
 #include "disassembler.h"
 
-uint8_t disassemble_line(char **output_line, uint8_t *memory, uint16_t pc, bool current)
+uint8_t disassemble_line(char **output_line, uint8_t *memory, uint32_t pc, bool current)
 {
 
   *output_line = malloc(22);
@@ -24,7 +24,7 @@ uint8_t disassemble_line(char **output_line, uint8_t *memory, uint16_t pc, bool 
     else if(pc > 0xfffe) {
       return 0;
     }
-    return 1;
+    return 2;
   }
   else {
     int opcode_index;

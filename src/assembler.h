@@ -1,4 +1,3 @@
-#ifndef ASSEMBLER_H
 /*
   assembler.h  Headerfile for assembler.c
   Copyright (C) 2019 Patrick Günthard
@@ -16,6 +15,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef ASSEMBLER_H
 #define ASSEMBLER_H
 
 #include <stdint.h>
@@ -104,7 +104,7 @@ char *add_label_reference(char*, uint16_t);
 
 uint8_t * link(uint8_t *memory, label *labels);
 
-char opcode_label_table[56][4] =
+static char opcode_label_table[56][4] =
   {
    "ADC",
    "AND",
@@ -262,7 +262,7 @@ bool is_force_word_op(char*);
 /*                                abs abx aby imm imp ind inx iny rel zpg zpx zpy acc*/
 static int op_address_size[13] = {3,  3,  3,  2,  1,  3,  3,  3,  1,  2,  2,  2,  1};
 
-static char pseudo_ops[1][4] = {".pc"};
-static int pseudo_ops_size = 1;
+static char pseudo_ops[3][5] = {".pc", ".byte", ".word"};
+static int pseudo_ops_size = 3;
 
 #endif
