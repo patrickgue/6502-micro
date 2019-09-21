@@ -55,7 +55,8 @@ int main(int argc, char **argv) {
   uint32_t program_counter = 0;
   uint16_t pc_offset = 0;
   bool pc_offset_set = false;
-  uint8_t *buffer = (uint8_t*) malloc(0);;
+  uint8_t *buffer = (uint8_t*) malloc(0);
+  uint8_t *bytes = malloc(3);
 
   char *tofree, *op;
   
@@ -67,12 +68,10 @@ int main(int argc, char **argv) {
 
   code_tf = strdup(assembly_code);
   while((line = strsep(&assembly_code, "\n")) != NULL) {
-    uint8_t *bytes = malloc(3);
     line = trim(line);
     printf("\"%s\"\n", line);
     size_t op_size;
     line_type current_line_type = get_line_type(line);
-    //printf("%d\n", current_line_type);
     switch(current_line_type) {
     case op_with_label:
     case operation:
@@ -94,6 +93,7 @@ int main(int argc, char **argv) {
       for(int i = 0; i < op_size; i++) {
 	buffer[program_counter - op_size + i] = bytes[i];
       }
+
       break;
     case pseudoop:
       tofree = strdup(line);
@@ -166,12 +166,17 @@ int main(int argc, char **argv) {
     printf("%s\n", line);
     i += pc_add;
     free(line);
-  } while( pc_add != 0);
+  } while( pc_add != 0 && i <= program_counter);
 
   FILE *f = fopen(argv[2], "wb");
   fwrite(buffer + pc_offset, 1, program_counter - pc_offset , f);
   fclose(f);
-  
+
+
+  free(buffer);
+  free(labels);
+  free(label_references);
+  free(bytes);
   return 0;
 }
 
@@ -210,7 +215,6 @@ size_t construct_binopt(char line[64], uint8_t **bytes) {
 
   
   size_t op_size = op_address_size[addr_info.mode];
-  *bytes = malloc(op_size);
   (*bytes)[0] = opcode_table[opindex][addr_info.mode];
 
   if(op_size > 1) {
@@ -219,7 +223,6 @@ size_t construct_binopt(char line[64], uint8_t **bytes) {
   if(op_size > 2) {
     (*bytes)[2] = addr_info.hbyte;
   }
-
   return op_size;
 }
 
@@ -437,6 +440,7 @@ char* add_label_reference(char *line, uint16_t pc) {
   ln[strlen(ln)-1] = '\0';
 
   strcpy(new_reference_label.labelname, ln);
+
   new_reference_label.pc = pc;
 
   if(is_relative_addr_op(cmd)) {
