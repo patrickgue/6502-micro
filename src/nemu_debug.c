@@ -19,8 +19,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 
-#include "assembler.h"
+#include "disassembler.h"
 #include "emulator.h"
 
 #include "nemu_debug.h"
@@ -66,54 +67,19 @@ void display_memory(int y_offset,int x_offset, emulator_state *state, uint8_t pa
 /* display disassembled code (5/12) */
 void display_disassemble(int y, int x, emulator_state* state)
 {
-  int pc = state->cpu->state.pc;
-  int pc_offset;
-  for(int i = 0; i < 20; i++) {
-    if(pc + pc_offset == 0xfffa)
-      mvprintw(y+i,x,"nmi vector to $%02x%02x", state->memory[pc + pc_offset], state->memory[pc + pc_offset + 1]);
-    else if(state->cpu->state.pc + pc_offset == 0xfffc)
-      mvprintw(y+i,x,"reset vector to $%02x%02x", state->memory[pc + pc_offset], state->memory[pc + pc_offset + 1]);
-    else if(state->cpu->state.pc + pc_offset == 0xfffe)
-      mvprintw(y+i,x,"irq vector to $%02x%02x", state->memory[pc + pc_offset], state->memory[pc + pc_offset + 1]);
-    else if(pc + pc_offset > 0xfffe) {
-      break;
+  int pc = state->cpu->state.pc & 0xff00;
+  int pc_offset = 0;
+  int y_display_offset = 0;
+  for(int i = 0; i < 255; i++) {
+    char *line;
+    pc_offset += disassemble_line(&line, state->memory, pc + pc_offset, (pc + pc_offset == state->cpu->state.pc));
+
+    if(state->cpu->state.pc - (pc + pc_offset) < 9 && y_display_offset < 20) {
+      mvprintw(y + y_display_offset, x, line);
+      y_display_offset++;
     }
-    else {
-      int opcode_index;
-      int addr_index;
-      bool addr_found = false;
-      for(opcode_index = 0; opcode_index < 56; opcode_index++) {
-	for(addr_index = 0; addr_index < 13; addr_index++) {
-	  if(state->memory[pc + pc_offset] == opcode_table[opcode_index][addr_index]) {
-	    addr_found = true;
-	    break;
-	  }
-	}
-	if(addr_found)
-	  break;
-      }
-      
-      
-      if(state->memory[pc + pc_offset] == 0) {
-	mvprintw(y+i,x,"%2s $%04x BRK/NULL", (i == 0 ? "->" : ""), state->cpu->state.pc + pc_offset);
-	pc_offset++;
-      }
-      else {
-	int size = op_address_size[addr_index];
-	mvprintw(y+i,x,"%2s $%04x %s", (i == 0 ? "->" : ""),
-		 pc + pc_offset,
-		 opcode_label_table[opcode_index]);
-	 
-	if(size == 3) {
-	  mvprintw(y+i,x+13,"$%02x%02x", state->memory[pc + pc_offset + 2],
-		   state->memory[pc + pc_offset + 1]);
-	}
-	else if(size == 2) {
-	  mvprintw(y+i,x+13,"$%02x", state->memory[pc + pc_offset + 1]);
-	}
-	pc_offset += size;
-      }
-    }
+
+    free(line);
   }
 }
 
