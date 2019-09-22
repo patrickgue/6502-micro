@@ -104,6 +104,8 @@ char *add_label_reference(char*, uint16_t);
 
 uint8_t * link(uint8_t *memory, label *labels);
 
+char *remove_comment(char *);
+
 static char opcode_label_table[56][4] =
   {
    "ADC",
@@ -260,7 +262,7 @@ static int force_word_ops_count = 2;
 bool is_force_word_op(char*);
 
 /*                                abs abx aby imm imp ind inx iny rel zpg zpx zpy acc*/
-static int op_address_size[13] = {3,  3,  3,  2,  1,  3,  3,  3,  1,  2,  2,  2,  1};
+static int op_address_size[13] = {3,  3,  3,  2,  1,  3,  3,  3,  2,  2,  2,  2,  1};
 
 static char pseudo_ops[3][5] = {".pc", ".byte", ".word"};
 static int pseudo_ops_size = 3;

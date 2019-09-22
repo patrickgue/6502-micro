@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
 
   code_tf = strdup(assembly_code);
   while((line = strsep(&assembly_code, "\n")) != NULL) {
+    line = remove_comment(line);
     line = trim(line);
     printf("\"%s\"\n", line);
     size_t op_size;
@@ -464,7 +465,17 @@ char* add_label_reference(char *line, uint16_t pc) {
   return output;
 }
 
-
+char *remove_comment(char *line) {
+  if(contains_single(line, ';')) {
+    for(int i = 0; i < strlen(line); i++) {
+      if(line[i] == ';') {
+	line[i] = '\0';
+	break;
+      }
+    }
+  }
+  return line;
+}
 
 
 uint8_t * link(uint8_t *memory, label *labels) {
