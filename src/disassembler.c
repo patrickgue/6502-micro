@@ -16,11 +16,11 @@ uint8_t disassemble_line(char **output_line, uint8_t *memory, uint32_t pc, bool 
   
   if(pc >= 0xfffa) {
     if(pc == 0xfffa)
-      sprintf(*output_line, "nmi vector to $%02x%02x", memory[pc], memory[pc + 1]);
+      sprintf(*output_line, "nmi vector to $%02x%02x", memory[pc + 1], memory[pc]);
     else if(pc == 0xfffc)
-      sprintf(*output_line, "reset vector to $%02x%02x", memory[pc], memory[pc + 1]);
+      sprintf(*output_line, "reset vector to $%02x%02x", memory[pc + 1], memory[pc]);
     else if(pc == 0xfffe)
-      sprintf(*output_line, "irq vector to $%02x%02x", memory[pc], memory[pc + 1]);
+      sprintf(*output_line, "irq vector to $%02x%02x", memory[pc + 1], memory[pc]);
     else if(pc > 0xfffe) {
       return 0;
     }
