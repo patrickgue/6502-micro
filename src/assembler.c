@@ -238,22 +238,12 @@ addressing_information calc_addressing_information(char number[18], bool force_w
       mode = zeropage;
   }
   else if(!contains(number, "()#") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
-    if(contains_single(number, 'X'))
+    uint16_t tmp_nr = parse_number(number,absolute_x);
+    if(tmp_nr > 0xff || force_word) {
+      if(contains_single(number, 'X'))
 	mode = absolute_x;
       else if(contains_single(number, 'Y'))
 	mode = absolute_y;
-  }
-  else if(contains(number, "#"))
-    mode = immediate;
-  else if(contains(number, "()") && !contains_single(number, ','))
-    mode = indirect;
-  else if(contains(number, "(),") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
-    uint16_t tmp_nr = parse_number(number, indirect_x);
-    if(tmp_nr > 0xff || force_word) {
-      if(contains_single(number, 'X'))
-	mode = indirect_x;
-      else if(contains_single(number, 'Y'))
-	mode = indirect_y;
     }
     else {
       if(contains_single(number, 'X'))
@@ -261,6 +251,17 @@ addressing_information calc_addressing_information(char number[18], bool force_w
       else if(contains_single(number, 'Y'))
 	mode = zeropage_y;
     }
+  }
+  else if(contains(number, "#"))
+    mode = immediate;
+  else if(contains(number, "()") && !contains_single(number, ','))
+    mode = indirect;
+  else if(contains(number, "(),") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
+    if(contains_single(number, 'X'))
+      mode = indirect_x;
+    else if(contains_single(number, 'Y'))
+      mode = indirect_y;
+  
   }
 
   uint16_t nbr = parse_number(number, mode);
