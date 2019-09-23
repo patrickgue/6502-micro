@@ -264,7 +264,7 @@ bool is_force_word_op(char*);
 /*                                abs abx aby imm imp ind inx iny rel zpg zpx zpy acc*/
 static int op_address_size[13] = {3,  3,  3,  2,  1,  3,  2,  2,  2,  2,  2,  2,  1};
 
-static char pseudo_ops[3][5] = {".pc", ".byte", ".word"};
+static char pseudo_ops[3][6] = {".pc", ".byte", ".word"};
 static int pseudo_ops_size = 3;
 
 #endif

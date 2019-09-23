@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 	 }
       }
       else if(strcmp(op, ".byte") == 0) {
-	buffer[program_counter] = parse_number(line, zeropage);
+	buffer[program_counter] = parse_number(line, zeropage) & 0x00ff;
 	program_counter++;
       }
       else if(strcmp(op, ".word") == 0) {
