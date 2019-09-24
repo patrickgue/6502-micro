@@ -29,4 +29,5 @@ bool contains_single(char *str, char s);
 bool contains(char *str, char *search);
 char *trim(char*);
 int strpos(char *str, char *target);
+unsigned long get_timestamp_ms();
 #endif /* HELPER_H */

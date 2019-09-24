@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <sys/time.h>
 
 #include <Z/hardware/CPU/architecture/6502.h>
 
@@ -131,4 +132,11 @@ int strpos(char *str, char *target) {
   char *res = strstr(str, target); 
   if (res == NULL) return -1;
   else             return res - str;
+}
+
+unsigned long get_timestamp_ms()
+{
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+  return tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
