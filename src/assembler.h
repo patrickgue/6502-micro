@@ -102,8 +102,6 @@ void add_label(char*, uint16_t);
 
 char *add_label_reference(char*, uint16_t);
 
-uint8_t * link(uint8_t *memory, label *labels);
-
 char *remove_comment(char *);
 
 static char opcode_label_table[56][4] =
