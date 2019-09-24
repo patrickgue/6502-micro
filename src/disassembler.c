@@ -32,13 +32,13 @@ uint8_t disassemble_line(char **output_line, uint8_t *memory, uint32_t pc, bool 
     bool addr_found = false;
     for(opcode_index = 0; opcode_index < 56; opcode_index++) {
       for(addr_index = 0; addr_index < 13; addr_index++) {
-	if(memory[pc] == opcode_table[opcode_index][addr_index]) {
-	  addr_found = true;
-	  break;
-	}
+        if(memory[pc] == opcode_table[opcode_index][addr_index]) {
+          addr_found = true;
+          break;
+        }
       }
       if(addr_found)
-	break;
+	      break;
     }
     
       
@@ -53,11 +53,11 @@ uint8_t disassemble_line(char **output_line, uint8_t *memory, uint32_t pc, bool 
 	       opcode_label_table[opcode_index]);
 	 
       if(size == 3) {
-	sprintf(*output_line,"%s $%02x%02x", *output_line, memory[pc + 2],
-		 memory[pc + 1]);
+	      sprintf(*output_line,"%s $%02x%02x", *output_line, memory[pc + 2],
+		    memory[pc + 1]);
       }
       else if(size == 2) {
-	sprintf(*output_line,"%s $%02x", *output_line, memory[pc + 1]);
+	      sprintf(*output_line,"%s $%02x", *output_line, memory[pc + 1]);
       }
       return size;
     }
