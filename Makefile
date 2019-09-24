@@ -34,7 +34,7 @@ SRCS_EMU=src/emu.c src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
 SRCS_NEMU=src/nemu.c src/disassembler.c src/nemu_debug.c src/emulator.c src/romloader.c src/helper.c  libsrc/6502.c
 SRCS_ASM=src/assembler.c src/disassembler.c src/helper.c
 
-SYSSRCS=src/system/loader.s src/system/testprog.s
+SYSSRCS=src/system/kernel.s src/system/testprog.s src/system/bootloader.s
 #SYSSRCS_C=src/system/testprogram.c
 
 OBJS_EMU=$(SRCS_EMU:.c=.o)
@@ -45,7 +45,8 @@ SYSOBJS=$(SYSSRCS:.s=.o65)
 #SYSOBJS_C=$(SYSSRCS_C:.c=.o65)
 
 all:$(TARGET_EMU) $(TARGET_NEMU) $(TARGET_ASM) $(SYSOBJS) #$(SYSOBJS_C)
-	cp $(SYSOBJS) src/system/loadrom.tbl ./bin
+	cp $(SYSOBJS) src/system/*.tbl ./bin
+	make -C ./src/hw_emu/
 
 $(TARGET_EMU):$(OBJS_EMU) 
 	$(CC) $(CFLAGS) $(EMU_CFLAGS) -o $@ $^
@@ -68,8 +69,9 @@ $(TARGET_ASM):$(OBJS_ASM)
 #	mv $(^:.c=) $@
 
 %.o65:%.s 
-	$(XA) $^ $@
+	$(XA) -i $^ -o $@
 
 
 clean:
 	rm -f bin/* src/*.o src/system/*.o* libsrc/*.o *.tbl
+	make -C src/hw_emu clean
