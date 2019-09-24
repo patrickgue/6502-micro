@@ -46,7 +46,6 @@ SYSOBJS=$(SYSSRCS:.s=.o65)
 
 all:$(TARGET_EMU) $(TARGET_NEMU) $(TARGET_ASM) $(SYSOBJS) #$(SYSOBJS_C)
 	cp $(SYSOBJS) src/system/*.tbl ./bin
-	make -C ./src/hw_emu/
 
 $(TARGET_EMU):$(OBJS_EMU) 
 	$(CC) $(CFLAGS) $(EMU_CFLAGS) -o $@ $^
@@ -74,4 +73,3 @@ $(TARGET_ASM):$(OBJS_ASM)
 
 clean:
 	rm -f bin/* src/*.o src/system/*.o* libsrc/*.o *.tbl
-	make -C src/hw_emu clean
