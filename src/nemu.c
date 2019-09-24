@@ -9,13 +9,12 @@
 
 #include "nemu.h"
 
-#define CLOCKSPEED 2000000//2000000
+#define CLOCKSPEED 2000000
 
 
 
 int main(int argc, char **argv)
 {
-  printf("%s", rw_buffer[0]);
   
   /* init ncurses */
   initscr();
@@ -42,46 +41,18 @@ int main(int argc, char **argv)
   int i = 0, ch;
   uint8_t page = 0;
   
-  nodelay(stdscr, TRUE);
+  if(step_count == 1)
+    nodelay(stdscr, TRUE);
+  else
+    nodelay(stdscr, FALSE);
+  
   clear();
   while(loop) {
     int cycles;
-    if((ch = getch()) != ERR) {
-
-      
-      if(ch == 'q')
-	loop = false;
-      else if(ch == ' ')
-	step = true;
-      else if(ch == KEY_LEFT) {
-	if(page > 0)
-	  page--;
-      }
-      else if(ch == KEY_RIGHT) {
-	if(page < 0xff)
-	  page++;
-      }
-      else if(ch == KEY_UP) {
-	if(page < 0xf0)
-	  page = (page & 0xf0) + 0x10;
-      }
-      else if(ch == KEY_DOWN) {
-	if(page > (page & 0xf0))
-	  page = page & 0xf0;
-	else if (page > 0)
-	  page -= 0x10;
-      }
-      
-
-    }
-    i++;
-    
     
     if(step_count == 1 || step) {
-      
-      char new_op_line[10];
-      sprintf(new_op_line, "  i %04x", state->cpu->state.pc);
-      update_rw_buffer(new_op_line);
+      rw_log log = {true, false, state->cpu->state.pc, 0};
+      update_rw_buffer(log);
       
       exec_cpu_cycle(&state);
       step = false;
@@ -91,8 +62,53 @@ int main(int argc, char **argv)
     display_rw_buffer(1,60);
     display_state(1,1,state);
     display_memory(8,1,state,page);
-    
+    display_tapeinterface(22, 60, state);
 
+
+    if((ch = getch()) != ERR) {
+
+      
+      if(ch == 'q')
+	      loop = false;
+      else if(ch == ' ')
+	      step = true;
+      else if(ch == 's') {
+	      step_count = 0;
+	      nodelay(stdscr, false);
+      }
+      else if(ch == 'c') {
+	      step_count = 1;
+	      nodelay(stdscr, true);
+      }
+      else if(ch == KEY_LEFT) {
+	      if(page > 0)
+	      page--;
+      }
+      else if(ch == KEY_RIGHT) {
+	      if(page < 0xff)
+	      page++;
+      }
+      else if(ch == KEY_UP) {
+	      if(page < 0xf0)
+	        page = (page & 0xf0) + 0x10;
+        }
+      else if(ch == KEY_DOWN) {
+	      if(page > (page & 0xf0))
+	      page = page & 0xf0;
+	      else if (page > 0)
+	      page -= 0x10;
+      }
+      else if(ch == 't') {
+	      state->hw_state.tape_started = true;
+      }
+      else if(ch == 'r') {
+        state->hw_state.tape_started = false;
+        state->hw_state.tape_byte_position = 0;
+        state->hw_state.tape_bit_position = 0;
+      }
+    }
+    i++;
+    
     refresh();
   }
 
@@ -107,9 +123,9 @@ int init_menu() {
     
     mvprintw(1,1,"6502 Emulator");
     mvprintw(3,1,"Copyright (C) 2019 Patrick Günthard");
-    mvprintw(4,1,"This program comes with ABSOLUTELY NO WARRANTY; Press [w] key to This is free ");
-    mvprintw(5,1,"software, and you are welcome to redistribute it under certain conditions;");
-    mvprintw(6,1,"Press [l] to show license.");
+    mvprintw(4,1,"This program comes with ABSOLUTELY NO WARRANTY; Press [w] key to show warranty. ");
+    mvprintw(5,1,"This is free software, and you are welcome to redistribute it under certain");
+    mvprintw(6,1," conditions; Press [l] to show license.");
     mvprintw(8,1,"You should have received a copy of the GNU General Public License along with");
     mvprintw(9,1,"this program.  If not, see <https://www.gnu.org/licenses/>.");
     mvprintw(11,1,"Use Arrow Keys to select stepping or continuous mode. Press Enter to continue.");
@@ -121,13 +137,13 @@ int init_menu() {
     ch = getch();
     if (ch != ERR) {
       if(ch == KEY_LEFT || ch == KEY_RIGHT)
-	select_mode = (select_mode == 0 ? 1 : 0);
+	      select_mode = (select_mode == 0 ? 1 : 0);
       else if(ch == 'w')
         license_warranty_info(warranty_info_text, warranty_info_text_length);
       else if(ch == 'l')
         license_warranty_info(license_info_text, license_info_text_length);
       else if(ch == '\n')
-	selected = true;
+	      selected = true;
       clear();
       refresh();
     }
@@ -153,7 +169,7 @@ void license_warranty_info(char text[][80], int length) {
     }
     for(int y = 2; y < LINES - 2; y++) {
       if(y + position < length)
-	mvprintw(y,0,text[y + position]);
+	      mvprintw(y,0,text[y + position]);
     }
     refresh();
     ch = getch();

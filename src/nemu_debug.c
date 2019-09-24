@@ -15,6 +15,19 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
+
+
 #include <ncurses.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -27,17 +40,26 @@
 #include "nemu_debug.h"
 
 
-void update_rw_buffer(char new_line[11]) {
+void update_rw_buffer(rw_log log) {
+  if(rw_buffer_length < 20)
+    rw_buffer_length++;
   for(int i = 0; i < rw_buffer_length -1; i++) {
-    strcpy(rw_buffer[i], rw_buffer[i+1]);
+    rw_buffer[i] = rw_buffer[i+1];
+    rw_buffer[i] = rw_buffer[i+1];
   }
-  strcpy(rw_buffer[rw_buffer_length -1], new_line);
+  rw_buffer[rw_buffer_length -1] = log;
 }
 
 void display_rw_buffer(int y, int x)
 {
   for(int i = 0; i < rw_buffer_length; i++) {
-    mvprintw(y+i,x,rw_buffer[i]);
+    if(rw_buffer[i].instr == true) {
+      mvprintw(y+i,x,"i %04x", rw_buffer[i].address);
+    }
+    else {
+      mvprintw(y+i,x,"%c %04x %02x", rw_buffer[i].rw ? 'r' : 'w', rw_buffer[i].address, rw_buffer[i].data);
+    }
+    
   }
 }
 
@@ -102,17 +124,35 @@ void display_state(int y, int x, emulator_state* state)
 	   (state->cpu->state.p & 0b00000100) >> 2,
 	   (state->cpu->state.p & 0b00000010) >> 1,
 	   (state->cpu->state.p & 0b00000001));
-  }
+}
+
+void display_tapeinterface(int y, int x, emulator_state*state)
+{
+  uint8_t byte = tapeinterface_read(&state);
+  mvprintw(y, x, "Tape Interface");
+  mvprintw(y+1, x, "R/W: %4s  Data: %4s",
+	   byte & 0b00000010 ? "high" : "low",
+	   byte & 0b00000001 ? "high" : "low");
+
+  mvprintw(y+3, x, "Byte    B pos.  b pos.");
+  mvprintw(y+4, x, "%02x      %04x    %02x",
+	   state->hw_state.tape_input_buffer[state->hw_state.tape_byte_position],
+	   state->hw_state.tape_byte_position,
+	   state->hw_state.tape_bit_position);
+
+  mvprintw(y+6,x,BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(state->hw_state.debug));
+}
 
 void debug_bus_read(uint16_t addr, uint8_t data) {
-  char new_line[RW_BUFFER_LINE_LEN];
-  sprintf(new_line, "r %04x %02x", addr, data);
-  update_rw_buffer(new_line);
+  rw_log log = {
+    false, true, addr, data
+  };
+  update_rw_buffer(log);
 }
 
 void debug_bus_write(uint16_t addr, uint8_t data) {
-  char new_line[RW_BUFFER_LINE_LEN];
-  sprintf(new_line, "w %04x %02x", addr, data);
-  update_rw_buffer(new_line);
+  rw_log log = {
+    false, false, addr, data
+  };
+  update_rw_buffer(log);
 }
-

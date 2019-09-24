@@ -18,19 +18,32 @@
 #ifndef NEMU_DEBUG_H
 #define NEMU_DEBUG_H
 
+struct s_rw_log {
+  bool instr;
+  bool rw;
+  uint16_t address;
+  uint8_t data;
+};
+
+typedef struct s_rw_log rw_log;
+
 void display_state(int,int,emulator_state*);
 
 void display_memory(int,int,emulator_state *,uint8_t);
 
 void display_disassemble(int,int,emulator_state*);
 
-void update_rw_buffer(char[]);
+void update_rw_buffer(rw_log);
 
 void display_rw_buffer(int,int);
 
-#define RW_BUFFER_LINE_LEN 11 // rw 1 + space 1 + addr 4 + space 1 + data 2 + zero 1
-static char rw_buffer[20][RW_BUFFER_LINE_LEN] = {"","","","","","","","","",""};
-static int  rw_buffer_length = 20;
+void display_tapeinterface(int, int, emulator_state*);
+
+
+
+
+static rw_log rw_buffer[20];
+static int  rw_buffer_length = 0;
 
 
 #endif
