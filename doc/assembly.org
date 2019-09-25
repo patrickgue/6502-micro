@@ -51,3 +51,7 @@ They can be accessed in the code using square brackets:
     OPC [labelname]
 #+END_SRC
 
+* Comments
+
+Everything after a semicolon character (;) is treated as a comment and gets
+ignored durring parsing.

@@ -1,4 +1,4 @@
-;;; loader.s  Bootloader and basic Kernel
+;;; kernel.s  Kernel with utilities
 ;;; Copyright (C) 2019 Patrick Günthard
 ;;; 
 ;;; This program is free software: you can redistribute it and/or modify
