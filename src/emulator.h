@@ -37,7 +37,6 @@ struct s_hardware_state {
   bool tape_read_wait;
   int tape_bits_per_sec;
   bool tape_started;
-  uint8_t debug;
 };
 
 typedef struct s_hardware_state hardware_state;

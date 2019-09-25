@@ -109,13 +109,11 @@ uint8_t tapeinterface_read(emulator_state **state, bool change_state)
       else if((*state)->hw_state.tape_started == true) {
         (*state)->hw_state.tape_read_wait = true;
         uint8_t current_byte = ((*state)->hw_state.tape_input_buffer[(*state)->hw_state.tape_byte_position] >> (*state)->hw_state.tape_bit_position) & 0b00000001;
-        (*state)->hw_state.debug = ((*state)->hw_state.debug << 1) + current_byte;
         (*state)->hw_state.tape_byte = 0b00000010 + current_byte;
         
         if((*state)->hw_state.tape_bit_position == 0) {
           (*state)->hw_state.tape_bit_position = 8;
           (*state)->hw_state.tape_byte_position++;
-          (*state)->hw_state.debug = 0;
         }
         (*state)->hw_state.tape_bit_position--;
       }

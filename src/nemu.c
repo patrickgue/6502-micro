@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     display_rw_buffer(1,60);
     display_state(1,1,state);
     display_memory(8,1,state,page);
-    display_tapeinterface(22, 60, state);
+    display_tapeinterface(23, 60, state);
 
 
     if((ch = getch()) != ERR) {

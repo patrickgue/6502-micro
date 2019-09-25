@@ -16,17 +16,6 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0')
-
 
 #include <ncurses.h>
 #include <stdint.h>
@@ -52,12 +41,18 @@ void update_rw_buffer(rw_log log) {
 
 void display_rw_buffer(int y, int x)
 {
+  attron(A_REVERSE);
+  mvprintw(y,x,"Bus Read/Write");
+  attroff(A_REVERSE);
+
   for(int i = 0; i < rw_buffer_length; i++) {
     if(rw_buffer[i].instr == true) {
-      mvprintw(y+i,x,"i %04x", rw_buffer[i].address);
+      attron(A_UNDERLINE);
+      mvprintw(y+i+1,x,"i %04x", rw_buffer[i].address);
+      attroff(A_UNDERLINE);
     }
     else {
-      mvprintw(y+i,x,"%c %04x %02x", rw_buffer[i].rw ? 'r' : 'w', rw_buffer[i].address, rw_buffer[i].data);
+      mvprintw(y+i+1,x,"%c %04x %02x", rw_buffer[i].rw ? 'r' : 'w', rw_buffer[i].address, rw_buffer[i].data);
     }
     
   }
@@ -66,7 +61,9 @@ void display_rw_buffer(int y, int x)
 
 /* display memory page (54/17) */
 void display_memory(int y_offset,int x_offset, emulator_state *state, uint8_t page) {
+  attron(A_REVERSE);
   mvprintw(y_offset,x_offset,"Memory (Page %02x)", page);
+  attroff(A_REVERSE);
   for(int x = 0; x < 0x10; x++) {
     mvprintw(y_offset+1,x_offset + 7 + (x * 3), "%02x",x);
     mvprintw(y_offset+2,x_offset + 7 + (x * 3), "---",x);
@@ -89,6 +86,9 @@ void display_memory(int y_offset,int x_offset, emulator_state *state, uint8_t pa
 /* display disassembled code (5/12) */
 void display_disassemble(int y, int x, emulator_state* state)
 {
+  attron(A_REVERSE);
+  mvprintw(y,x,"Disassembled Code");
+  attroff(A_REVERSE);
   int pc = state->cpu->state.pc & 0xff00;
   int pc_offset = 0;
   int y_display_offset = 0;
@@ -97,7 +97,7 @@ void display_disassemble(int y, int x, emulator_state* state)
     pc_offset += disassemble_line(&line, state->memory, pc + pc_offset, (pc + pc_offset == state->cpu->state.pc));
 
     if(state->cpu->state.pc - (pc + pc_offset) < 9 && y_display_offset < 20) {
-      mvprintw(y + y_display_offset, x, line);
+      mvprintw(y + y_display_offset+1, x, line);
       y_display_offset++;
     }
 
@@ -108,13 +108,19 @@ void display_disassemble(int y, int x, emulator_state* state)
 /* display state of cpu (6/33) */
 void display_state(int y, int x, emulator_state* state)
 {
+  attron(A_REVERSE);
   mvprintw(y,x,"Registers");
+  attroff(A_REVERSE);
   mvprintw(y+1,x,"A: %02x  X: %02x  Y: %02x  PC: %04x",
 	   state->cpu->state.a,
 	   state->cpu->state.x,
 	   state->cpu->state.y,
 	   state->cpu->state.pc);
+  
+  attron(A_REVERSE);
   mvprintw(y+3,x,"Flags");
+  attroff(A_REVERSE);
+
   mvprintw(y+4,x,"| N | V |   | B | D | I | Z | C |");
   mvprintw(y+5,x,"  %d   %d       %d   %d   %d   %d   %d",
 	   (state->cpu->state.p & 0b10000000) >> 7,
@@ -129,7 +135,10 @@ void display_state(int y, int x, emulator_state* state)
 void display_tapeinterface(int y, int x, emulator_state*state)
 {
   uint8_t byte = tapeinterface_read(&state, false);
+  attron(A_REVERSE);
   mvprintw(y, x, "Tape Interface");
+  attroff(A_REVERSE);
+
   mvprintw(y+1, x, "R/W: %4s  Data: %4s",
 	   byte & 0b00000010 ? "high" : "low",
 	   byte & 0b00000001 ? "high" : "low");
@@ -139,8 +148,6 @@ void display_tapeinterface(int y, int x, emulator_state*state)
 	   state->hw_state.tape_input_buffer[state->hw_state.tape_byte_position],
 	   state->hw_state.tape_byte_position,
 	   state->hw_state.tape_bit_position);
-
-  mvprintw(y+6,x,BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(state->hw_state.debug));
 }
 
 void debug_bus_read(uint16_t addr, uint8_t data) {
