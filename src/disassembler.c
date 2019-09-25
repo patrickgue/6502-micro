@@ -51,13 +51,42 @@ uint8_t disassemble_line(char **output_line, uint8_t *memory, uint32_t pc, bool 
       sprintf(*output_line, "%2s $%04x %s", arrow_symbol,
 	       pc,
 	       opcode_label_table[opcode_index]);
-	 
-      if(size == 3) {
-	      sprintf(*output_line,"%s $%02x%02x", *output_line, memory[pc + 2],
-		    memory[pc + 1]);
-      }
-      else if(size == 2) {
-	      sprintf(*output_line,"%s $%02x", *output_line, memory[pc + 1]);
+      switch((addressing_mode)addr_index) {
+        case absolute:
+          sprintf(*output_line,"%s $%02x%02x", *output_line, memory[pc + 2], memory[pc + 1]);
+          break;
+        case absolute_x:
+          sprintf(*output_line,"%s $%02x%02x,X", *output_line, memory[pc + 2], memory[pc + 1]);
+          break;
+        case absolute_y:
+          sprintf(*output_line,"%s $%02x%02x,Y", *output_line, memory[pc + 2], memory[pc + 1]);
+          break;
+        case indirect:
+          sprintf(*output_line,"%s ($%02x%02x)", *output_line, memory[pc + 2], memory[pc + 1]);
+          break;
+        case indirect_x:
+          sprintf(*output_line,"%s ($%02x,X)", *output_line, memory[pc + 1]);
+          break;
+        case indirect_y:
+          sprintf(*output_line,"%s ($%02x),Y", *output_line, memory[pc + 1]);
+          break;
+        case zeropage_x:
+          sprintf(*output_line,"%s $%02x,X", *output_line, memory[pc + 1]);
+          break;
+        case zeropage_y:
+          sprintf(*output_line,"%s $%02x,Y", *output_line, memory[pc + 1]);
+          break;
+        case zeropage:
+        case relative:
+          sprintf(*output_line,"%s $%02x", *output_line, memory[pc + 1]);
+          break;
+        case immediate:
+          sprintf(*output_line,"%s #$%02x", *output_line, memory[pc + 1]);
+          break;
+        case accumlator:
+        case implied:
+          // nothing to do
+          break;
       }
       return size;
     }
