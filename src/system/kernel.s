@@ -18,7 +18,6 @@
 	.pc $f800
 kernel_main:
 	CLI			; enable irq interrupts
-	
 	;; prepare tape loading
 	LDA #$00
 	STA $00
@@ -57,6 +56,7 @@ read_bit:
 	LDA $02				; read from value stored from tape interface in wait_data
 	AND #$01			; only keep lowest bit
 	ADC ($00),Y			; add shifted value to current data position
+	STA ($00),Y
 	DEX
 	BNE [wait_no_data]
 prep_next_byte:	

@@ -83,11 +83,11 @@ void tapeinterface_init(emulator_state **state, char *table_file)
   file = strsep(&table, "\n");
   (*state)->hw_state.tape_size = readfile((char**)&(*state)->hw_state.tape_input_buffer, file, true);
   (*state)->hw_state.tape_byte_position = 0;
-  (*state)->hw_state.tape_bit_position = 8;
+  (*state)->hw_state.tape_bit_position = 7;
   (*state)->hw_state.tape_byte = 0b00000000;
   (*state)->hw_state.tape_last_state_change = get_timestamp_ms();
   (*state)->hw_state.tape_read_wait = true;
-  (*state)->hw_state.tape_bits_per_sec = 1;
+  (*state)->hw_state.tape_bits_per_sec = 4;
   (*state)->hw_state.tape_started = false;
 }
 
@@ -111,13 +111,13 @@ uint8_t tapeinterface_read(emulator_state **state, bool change_state)
         uint8_t current_byte = ((*state)->hw_state.tape_input_buffer[(*state)->hw_state.tape_byte_position] >> (*state)->hw_state.tape_bit_position) & 0b00000001;
         (*state)->hw_state.debug = ((*state)->hw_state.debug << 1) + current_byte;
         (*state)->hw_state.tape_byte = 0b00000010 + current_byte;
-        (*state)->hw_state.tape_bit_position--;
+        
         if((*state)->hw_state.tape_bit_position == 0) {
           (*state)->hw_state.tape_bit_position = 8;
           (*state)->hw_state.tape_byte_position++;
           (*state)->hw_state.debug = 0;
         }
-
+        (*state)->hw_state.tape_bit_position--;
       }
     }
     
