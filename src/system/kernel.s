@@ -20,11 +20,11 @@ kernel_main:
 	CLI			; enable irq interrupts
 	
 	;; prepare tape loading
-	;LDA #$00
-	;STA $00
-	;LDA #$02
-	;STA $01			; store $0200 to $00 for the tape read to know where to put fetched data
-	;JSR [tape_read]		; call tape_read subroutine
+	LDA #$00
+	STA $00
+	LDA #$02
+	STA $01			; store $0200 to $00 for the tape read to know where to put fetched data
+	JSR [tape_read]		; call tape_read subroutine
 
 	;; execute loaded program
 	JMP $0200 		; jump to main
@@ -34,21 +34,17 @@ kernel_main:
 
 ;;; variables in memory:
 ;;;   $00, $01 = address
-;;;   $02 = temp value
-;;;   $03 = byte position decrementor
-;;;   $04 = multi purpose counter
+;;;   $02 = input value fetched  in [wait_data]
 tape_read:
-	LDA #$00
-	TAY
-	LDA #$08
-	STA $02
+	LDY #$00
+	LDX #$08
 wait_data:
-	LDA $f7ff		; read from tape interface
-	STA $05
+	LDA $f7ff			; read from tape interface
+	STA $02
 	AND #$02	    	; check if read bit is set
 	BNE [read_bit]
-	LDA $05			; read value previously fetched from tape interface
-	AND #$01		; check if data bit is set. if set, data transmition is done
+	LDA $02				; read value previously fetched from tape interface
+	AND #$01			; check if data bit is set. if set, data transmition is done
 	BEQ [transm_cont]	; else continue
 	RTS
 transm_cont:	
@@ -56,26 +52,22 @@ transm_cont:
 
 read_bit:
 	LDA ($00),Y
-	ROL			; rotate current byte
+	ROL					; rotate current byte
 	STA ($00),Y
-	LDA $05			; read from value stored from tape interface in wait_data
-	AND #$01		; only keep lowest bit
-	ADC ($00),Y		; add shifted value to current data position
-	DEC $02
+	LDA $02				; read from value stored from tape interface in wait_data
+	AND #$01			; only keep lowest bit
+	ADC ($00),Y			; add shifted value to current data position
+	DEX
 	BNE [wait_no_data]
 prep_next_byte:	
 	INY
-	LDA #$08
-	STA $02
-	
+	LDX #$08
+
 wait_no_data:	
-	LDA $f7ff		; read from tape interface
-	AND #$02		; check if read bit is set
+	LDA $f7ff			; read from tape interface
+	AND #$02			; check if read bit is set
 	BNE [wait_no_data]	; keep waiting if not zero; else continue
 	JMP [wait_data]
-
-
-
 
 ;;; Interrupt Handlers
 	.pc $ffa0
