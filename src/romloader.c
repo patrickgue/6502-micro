@@ -57,7 +57,6 @@ void load_rom(char filename[64], emulator_state **state)
           printf("romloader: Overflow error: %04x", i);
         }
       }
- 
     }
   }
   free(tofree_contents);
