@@ -37,6 +37,17 @@ struct s_hardware_state {
   bool tape_read_wait;
   int tape_bits_per_sec;
   bool tape_started;
+
+  /* Video (VT100ish) Emulation */
+  int video_buffer[1001];
+  int video_buffer_size;
+  int video_buffer_bit_pos;
+
+
+  /* PS/2 Keyboard Emulation */
+  char *ps2_buffer;
+  int ps2_buffer_position;
+  int ps2_buffer_bit_position;
 };
 
 typedef struct s_hardware_state hardware_state;
@@ -47,6 +58,7 @@ struct s_emulator_state {
   long clockspeed;
   void (*debug_read)(uint16_t, uint8_t);
   void (*debug_write)(uint16_t, uint8_t);
+  unsigned long long int passed_cycles;
   hardware_state hw_state;
 };
 
@@ -59,5 +71,9 @@ size_t exec_cpu_cycle(emulator_state **);
 void tapeinterface_init(emulator_state**, char *);
   
 uint8_t tapeinterface_read(emulator_state **, bool);
+
+void vt100_add_bit(emulator_state **, uint8_t);
+
+void ps2_send_bit(emulator_state **, char);
 
 #endif

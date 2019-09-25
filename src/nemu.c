@@ -21,6 +21,7 @@ int main(int argc, char **argv)
   cbreak();
   noecho();
   keypad(stdscr, TRUE);
+  bool debug_interaction_mode = true; 
   int CWIDTH = COLS > 120 ? 120 : COLS;
   int CHEIGHT = LINES > 40 ? 40 : LINES;
   
@@ -58,16 +59,26 @@ int main(int argc, char **argv)
       step = false;
     }
     erase();
-    display_disassemble(1,80,state);
-    display_rw_buffer(1,60);
-    display_state(1,1,state);
-    display_memory(8,1,state,page);
-    display_tapeinterface(23, 60, state);
+    attron(A_UNDERLINE);
+    attron(A_REVERSE);
+    mvprintw(1,1,"%3s Debugger", debug_interaction_mode ? "-->" : "");
+    attroff(A_REVERSE);
+    attroff(A_UNDERLINE);
+    display_disassemble(3,80,state);
+    display_rw_buffer(3,60);
+    display_state(3,1,state);
+    display_memory(11,1,state,page);
+    display_tapeinterface(26, 60, state);
 
+    attron(A_UNDERLINE);
+    attron(A_REVERSE);
+    mvprintw(33,1,"%3s IO", debug_interaction_mode ? "" : "-->");
+    attroff(A_REVERSE);
+    attroff(A_UNDERLINE);
+
+    display_vt100(35,1,state);
 
     if((ch = getch()) != ERR) {
-
-      
       if(ch == 'q')
 	      loop = false;
       else if(ch == ' ')

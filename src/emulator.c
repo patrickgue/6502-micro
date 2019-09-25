@@ -45,8 +45,13 @@ zuint8 bus_read(void *context, zuint16 address)
 
 void bus_write(void *context, zuint16 address, zuint8 value) {
   emulator_state *state = (emulator_state*) context;
-  state->debug_write(address,state->memory[address]);
-  state->memory[address] = value;
+  if(address < 0xf7fe) {
+    state->debug_write(address,state->memory[address]);
+    state->memory[address] = value;
+  }
+  else if(address == 0xf7fe) {
+    vt100_add_bit(&state, value);
+  }
 }
 
 
@@ -65,6 +70,10 @@ void init_emulator(emulator_state **state, long clockspeed)
   (*state)->cpu->context = *state;
 
   tapeinterface_init(state, "bin/tape.tbl");
+
+
+  (*state)->hw_state.video_buffer_bit_pos = 0;
+  (*state)->hw_state.video_buffer_size = 0;
 }
 
 
@@ -72,6 +81,7 @@ size_t exec_cpu_cycle(emulator_state **state)
 {
   zusize cycles =  m6502_run((*state)->cpu, 1);
   usleep(cycles * (1000000 / (*state)->clockspeed));
+  (*state)->passed_cycles += cycles;
   return cycles;
 }
 
@@ -122,3 +132,19 @@ uint8_t tapeinterface_read(emulator_state **state, bool change_state)
   }
   return (*state)->hw_state.tape_byte;
 }
+
+
+void vt100_add_bit(emulator_state **state, uint8_t data) {
+  (*state)->hw_state.video_buffer[(*state)->hw_state.video_buffer_size] = (*state)->hw_state.video_buffer[(*state)->hw_state.video_buffer_size] << 1;
+  (*state)->hw_state.video_buffer[(*state)->hw_state.video_buffer_size] += data & 0b00000001;
+  
+  if((*state)->hw_state.video_buffer_bit_pos == 7) {
+    (*state)->hw_state.video_buffer_bit_pos = 0;
+    (*state)->hw_state.video_buffer_size++;
+  }
+  else {
+    (*state)->hw_state.video_buffer_bit_pos++;
+  }
+}
+
+

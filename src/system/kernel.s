@@ -23,11 +23,15 @@ kernel_main:
 	STA $00
 	LDA #$02
 	STA $01			; store $0200 to $00 for the tape read to know where to put fetched data
-	JSR [tape_read]		; call tape_read subroutine
+	;JSR [tape_read]		; call tape_read subroutine
 
-	;; execute loaded program
-	JMP $0200 		; jump to main
-
+	LDA #$20 ; space
+	STA $0200
+loop:
+	JSR [print_char]
+	INC $0200
+	JMP [loop]
+	
 
 ;;; Tape read routines
 
@@ -68,6 +72,40 @@ wait_no_data:
 	AND #$02			; check if read bit is set
 	BNE [wait_no_data]	; keep waiting if not zero; else continue
 	JMP [wait_data]
+
+
+
+	.pc $fa00
+;;; Print Character Routine
+;;;
+;;; $0000 and $0001 pointer to character
+print_char:
+	LDY #$00			; reset Y
+	LDX #$08			; setup incrementor
+	LDA #$80			; setup mask
+	STA $02
+pr_next_bit:
+	LDA ($00),Y
+	AND $02
+	BEQ [pr_send_low]
+pr_send_high:
+	LDA #$01
+	STA $f7fe
+	JMP [pr_jmp_next]
+pr_send_low:
+	LDA #$00
+	STA $f7fe
+pr_jmp_next:
+	CLC
+	ROR $02
+	DEX
+	BEQ [pr_return]
+	JMP [pr_next_bit]
+pr_return:
+	RTS
+
+
+
 
 ;;; Interrupt Handlers
 	.pc $ffa0

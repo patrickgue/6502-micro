@@ -150,14 +150,68 @@ void display_tapeinterface(int y, int x, emulator_state*state)
 	   state->hw_state.tape_bit_position);
 }
 
-void debug_bus_read(uint16_t addr, uint8_t data) {
+
+void display_vt100(int y, int x, emulator_state *state) 
+{
+  attron(A_REVERSE);
+  mvprintw(y,x,"VT100 Emulation");
+  attroff(A_REVERSE);
+  for(int i = 1; i < 81; i++) {
+    mvprintw(y+1,x+i, "-");
+    mvprintw(y+26+1,x+i, "-");
+  }
+  for(int i = 1; i < 26; i++) {
+    mvprintw(y+i+1,x, "|");
+    mvprintw(y+i+1,x+81, "|");
+  }
+
+  int col = 0, line = 0,
+      coloffset = col + 1, lineoffset = line + 2;
+
+  for(int i = 0; i < state->hw_state.video_buffer_size;i++) {
+    if(state->hw_state.video_buffer[i] < 32) {
+      switch(state->hw_state.video_buffer[i]) {
+      case 0x0c:
+        col = 0;
+        line = 0;
+        break;
+      case 0x0a:
+      case 0x0d:
+        col=0;
+        line++;
+        break;
+      case 0x08:
+        col--;
+        if(col < 0) {
+          col = 79;
+          line--;
+        } 
+        break;
+      }
+    }
+    else {
+      mvprintw(y + line + lineoffset, x + col + coloffset, "%c", state->hw_state.video_buffer[i]);
+      col++;
+      if(col==80) {
+        col=0;
+        line++;
+      }
+    }
+
+  }
+
+}
+
+void debug_bus_read(uint16_t addr, uint8_t data)
+{
   rw_log log = {
     false, true, addr, data
   };
   update_rw_buffer(log);
 }
 
-void debug_bus_write(uint16_t addr, uint8_t data) {
+void debug_bus_write(uint16_t addr, uint8_t data)
+{
   rw_log log = {
     false, false, addr, data
   };
