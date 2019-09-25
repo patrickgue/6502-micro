@@ -1,2 +1,2 @@
 f800:./bin/kernel.o65
-ffa0:./bin/bootloader.o65
+fffa:./bin/bootloader.o65
