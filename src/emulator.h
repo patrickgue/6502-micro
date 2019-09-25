@@ -23,6 +23,7 @@
 #include <emulation/CPU/6502.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 
 struct s_hardware_state {
@@ -58,6 +59,6 @@ size_t exec_cpu_cycle(emulator_state **);
 
 void tapeinterface_init(emulator_state**, char *);
   
-uint8_t tapeinterface_read(emulator_state **);
+uint8_t tapeinterface_read(emulator_state **, bool);
 
 #endif

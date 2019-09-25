@@ -128,7 +128,7 @@ void display_state(int y, int x, emulator_state* state)
 
 void display_tapeinterface(int y, int x, emulator_state*state)
 {
-  uint8_t byte = tapeinterface_read(&state);
+  uint8_t byte = tapeinterface_read(&state, false);
   mvprintw(y, x, "Tape Interface");
   mvprintw(y+1, x, "R/W: %4s  Data: %4s",
 	   byte & 0b00000010 ? "high" : "low",

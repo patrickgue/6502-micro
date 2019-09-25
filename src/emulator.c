@@ -33,7 +33,7 @@ zuint8 bus_read(void *context, zuint16 address)
 {
   emulator_state *state = (emulator_state*) context;
   if(address == 0xF7FF) {
-    uint8_t byte = tapeinterface_read(&state);
+    uint8_t byte = tapeinterface_read(&state, true);
     state->debug_read(address,byte);
     return byte;
   }
@@ -83,7 +83,7 @@ void tapeinterface_init(emulator_state **state, char *table_file)
   file = strsep(&table, "\n");
   (*state)->hw_state.tape_size = readfile((char**)&(*state)->hw_state.tape_input_buffer, file, true);
   (*state)->hw_state.tape_byte_position = 0;
-  (*state)->hw_state.tape_bit_position = 7;
+  (*state)->hw_state.tape_bit_position = 8;
   (*state)->hw_state.tape_byte = 0b00000000;
   (*state)->hw_state.tape_last_state_change = get_timestamp_ms();
   (*state)->hw_state.tape_read_wait = true;
@@ -91,10 +91,10 @@ void tapeinterface_init(emulator_state **state, char *table_file)
   (*state)->hw_state.tape_started = false;
 }
 
-uint8_t tapeinterface_read(emulator_state **state)
+uint8_t tapeinterface_read(emulator_state **state, bool change_state)
 {
    
-   if(get_timestamp_ms() - (*state)->hw_state.tape_last_state_change
+   if(change_state && get_timestamp_ms() - (*state)->hw_state.tape_last_state_change
       > (500) / (*state)->hw_state.tape_bits_per_sec) {
      
     (*state)->hw_state.tape_last_state_change = get_timestamp_ms();
@@ -113,7 +113,7 @@ uint8_t tapeinterface_read(emulator_state **state)
         (*state)->hw_state.tape_byte = 0b00000010 + current_byte;
         (*state)->hw_state.tape_bit_position--;
         if((*state)->hw_state.tape_bit_position == 0) {
-          (*state)->hw_state.tape_bit_position = 7;
+          (*state)->hw_state.tape_bit_position = 8;
           (*state)->hw_state.tape_byte_position++;
           (*state)->hw_state.debug = 0;
         }
@@ -122,5 +122,5 @@ uint8_t tapeinterface_read(emulator_state **state)
     }
     
   }
-   return (*state)->hw_state.tape_byte;
+  return (*state)->hw_state.tape_byte;
 }
