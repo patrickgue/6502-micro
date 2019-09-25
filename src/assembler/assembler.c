@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#include "helper.h"
+#include "../helper.h"
 #include "disassembler.h"
 
 #include "assembler.h"

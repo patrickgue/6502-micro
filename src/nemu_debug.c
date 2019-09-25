@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "disassembler.h"
+#include "./assembler/disassembler.h"
 #include "emulator.h"
 
 #include "nemu_debug.h"

@@ -31,8 +31,8 @@ NEMU_CFLAGS=-lncurses
 TARGET_ASM="bin/as65"
 
 SRCS_EMU=src/emu.c src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
-SRCS_NEMU=src/nemu.c src/disassembler.c src/nemu_debug.c src/emulator.c src/romloader.c src/helper.c  libsrc/6502.c
-SRCS_ASM=src/assembler.c src/disassembler.c src/helper.c
+SRCS_NEMU=src/nemu.c src/assembler/disassembler.c src/nemu_debug.c src/emulator.c src/romloader.c src/helper.c  libsrc/6502.c
+SRCS_ASM=src/assembler/assembler.c src/assembler/disassembler.c src/helper.c
 
 SYSSRCS=src/system/kernel.s src/system/testprog.s src/system/bootloader.s
 #SYSSRCS_C=src/system/testprogram.c
@@ -72,4 +72,4 @@ $(TARGET_ASM):$(OBJS_ASM)
 
 
 clean:
-	rm -f bin/* src/*.o src/system/*.o* libsrc/*.o *.tbl
+	rm -f bin/* src/*.o src/assembler/*.o src/system/*.o* libsrc/*.o *.tbl
