@@ -56,7 +56,7 @@ void init_emulator(emulator_state **state, long clockspeed)
   *state = malloc(sizeof(emulator_state));
   (*state)->memory = (zuint8*) malloc(0x10000 * sizeof(zuint8));
 
-  load_rom("bin/rom.tbl",(*state)->memory);
+  load_rom("bin/rom.tbl", state);
 
   (*state)->clockspeed = clockspeed;
   (*state)->cpu = (M6502*) malloc(sizeof(M6502));
@@ -65,8 +65,6 @@ void init_emulator(emulator_state **state, long clockspeed)
   (*state)->cpu->context = *state;
 
   tapeinterface_init(state, "bin/tape.tbl");
- 
-
 }
 
 

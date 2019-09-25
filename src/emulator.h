@@ -52,7 +52,6 @@ struct s_emulator_state {
 
 typedef struct s_emulator_state emulator_state;
 
-
 void init_emulator(emulator_state**, long);
 
 size_t exec_cpu_cycle(emulator_state **);

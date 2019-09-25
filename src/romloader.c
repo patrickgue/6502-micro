@@ -26,10 +26,11 @@
 
 #include <Z/hardware/CPU/architecture/6502.h>
 
+#include "emulator.h"
 #include "romloader.h"
 #include "helper.h"
 
-void load_rom(char filename[64], zuint8 * memory)
+void load_rom(char filename[64], emulator_state **state)
 {
   printf("Fake ROM by loading programs into specific locations in memory\n");
   char *line_token, *filecontents, *word_token, *tofree_contents, *tofree_line;
@@ -41,23 +42,26 @@ void load_rom(char filename[64], zuint8 * memory)
   while((line_token = strsep(&filecontents, "\n")) != NULL) {
     tofree_line = strdup(line_token);
     if(strlen(line_token) > 3) {
-      printf("%s\n", line_token);
+      
 
       char *addr = strsep(&line_token, ":");
       char *filename = strsep(&line_token, ":");
       free(tofree_line);
     
+
       zuint8 *code;
       zusize progsize = readfile((char**)&code, filename, true);
       zuint16 addr_int = strtol(addr, NULL, 16);
+      
+      printf("%s %04x %04x\n", filename, addr_int, progsize);
+      
       for(int i = addr_int; i < addr_int + progsize; i++) {
-	//printf("%04x %02x\n", i, code[i-addr_int]);
-	if(i > 0 && i <= 0xffff) {
-	  memory[i] = code[i-addr_int];
-	}
-	else {
-	  printf("romloader: Overflow error: %04x", i);
-	}
+        if(i > 0 && i <= 0xffff) {
+          (*state)->memory[i] = code[i-addr_int];
+        }
+        else {
+          printf("romloader: Overflow error: %04x", i);
+        }
       }
  
     }

@@ -22,8 +22,9 @@
 
 #include <Z/hardware/CPU/architecture/6502.h>
 
+#include "emulator.h"
 
-void load_rom(char[], zuint8*);
+void load_rom(char[], emulator_state**);
 
 
 
