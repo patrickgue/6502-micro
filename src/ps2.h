@@ -150,11 +150,11 @@ static ps2_scancode scancodes[101] = {
     {"Enter", 0xE05A, 0xE0F05A}*/
 };
 
-int init_scancodes(ps2_encoding **);
+int init_ps2_encodings(ps2_encoding **);
 void add_ps2_encoding(ps2_encoding **, int, char, ps2_scancode, ps2_modifier);
 ps2_scancode get_scan_code(char*);
 
-size_t encode_ps2(ps2_encoding*, int, char *, uint32_t**);
+size_t encode_ps2(ps2_encoding*, int, char *, uint8_t**);
 char decode_ps2(ps2_encoding*,uint32_t *, size_t);
 
 #endif

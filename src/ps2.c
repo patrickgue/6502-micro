@@ -5,7 +5,7 @@
 #include "ps2.h"
 
 /* yes, this is a mess. Must be cleaned up at some point and extended to use other layout than en_US */
-int init_encodings(ps2_encoding **encoding) {
+int init_ps2_encodings(ps2_encoding **encoding) {
     (*encoding) = malloc(0x80 * sizeof(ps2_encoding));
     int index = 0;
     add_ps2_encoding(encoding, index, '\n', get_scan_code("Enter"), NONE); index++;
@@ -51,7 +51,7 @@ int init_encodings(ps2_encoding **encoding) {
     add_ps2_encoding(encoding, index, '_', get_scan_code("-"), SHIFT); index++;
     add_ps2_encoding(encoding, index, '`', get_scan_code("`"), NONE); index++;
     for(char i = 'a'; i <= 'z'; i++) {
-        char str[2] = {i+0x20, '\0'}; 
+        char str[2] = {i-0x20, '\0'}; 
         add_ps2_encoding(encoding, index, i, get_scan_code(str), NONE); index++;
     }
     add_ps2_encoding(encoding, index, '{', get_scan_code("["), SHIFT); index++;
@@ -75,15 +75,16 @@ void add_ps2_encoding(ps2_encoding** encoding, int index, char ascii, ps2_scanco
     if(modifier == SHIFT) {
         ps2_scancode modifier_code = get_scan_code("Shift (Left)");
         (*encoding)[index].sequence[0] = modifier_code.make_code;
+        (*encoding)[index].sequence[1] = code.make_code;
+        (*encoding)[index].sequence[3] = (code.break_code & 0xff00) >> 8;
+        (*encoding)[index].sequence[2] = code.break_code & 0x00ff;
         (*encoding)[index].sequence[4] = (modifier_code.break_code & 0xff00) >> 8;
         (*encoding)[index].sequence[5] = modifier_code.break_code & 0x00ff;
     }
 
-    (*encoding)[index].sequence[1] = code.make_code;
-    (*encoding)[index].sequence[3] = (code.break_code & 0xff00) >> 8;
+    (*encoding)[index].sequence[0] = code.make_code;
+    (*encoding)[index].sequence[1] = ((code.break_code & 0xff00) >> 8);
     (*encoding)[index].sequence[2] = code.break_code & 0x00ff;
-
-    (*encoding)[index].sequence = malloc((*encoding)[index].sequence_size * sizeof(uint8_t));
 }
 
 ps2_scancode get_scan_code(char* str) {
@@ -94,7 +95,7 @@ ps2_scancode get_scan_code(char* str) {
     }
 }
 
-size_t encode_ps2(ps2_encoding *encoding, int encoding_table_size, char *ncurses_str, uint32_t **target) {
+size_t encode_ps2(ps2_encoding *encoding, int encoding_table_size, char *ncurses_str, uint8_t **target) {
     char ascii;
     bool useCtrl = false;
     int size_actual;
@@ -109,18 +110,23 @@ size_t encode_ps2(ps2_encoding *encoding, int encoding_table_size, char *ncurses
         if(encoding[i].ascii == ascii) {
             size_actual = encoding[i].sequence_size + (useCtrl ? 3 : 0);
             *target = malloc(size_actual);
-            memcpy(*target, encoding[i].sequence + (useCtrl ? 1 : 0), size_actual);
             if(useCtrl) {
+                memcpy(*target + 1, encoding[i].sequence, size_actual);
                 ps2_scancode modifier_code = get_scan_code("Ctrl (Left)");
                 (*target)[0] = modifier_code.make_code;
-                (*target)[encoding[i].sequence_size+2] = (modifier_code.break_code & 0xff00) >> 8;
-                (*target)[encoding[i].sequence_size+3] = (modifier_code.break_code & 0x00ff);
+                (*target)[encoding[i].sequence_size] = (modifier_code.break_code & 0xff00) >> 8;
+                (*target)[encoding[i].sequence_size+1] = (modifier_code.break_code & 0x00ff);
 
+            }
+            else {
+                memcpy(*target, encoding[i].sequence, size_actual);
             }
             return size_actual;
         }
     }
+    return 0;
 }
+
 char decode_ps2(ps2_encoding *encoding, uint32_t *source, size_t size) {
   return 0;
 }

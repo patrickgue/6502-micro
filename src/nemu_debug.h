@@ -41,6 +41,7 @@ void display_tapeinterface(int, int, emulator_state*);
 
 void display_vt100(int, int, emulator_state*);
 
+void display_ps2(int, int, emulator_state*);
 
 
 

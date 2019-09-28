@@ -26,6 +26,7 @@
 
 #include "romloader.h"
 #include "helper.h"
+#include "ps2.h"
 #include "emulator.h"
 
 
@@ -35,6 +36,11 @@ zuint8 bus_read(void *context, zuint16 address)
   if(address == 0xF7FF) {
     uint8_t byte = tapeinterface_read(&state, true);
     state->debug_read(address,byte);
+    return byte;
+  }
+  if(address == 0xF7FD) {
+    uint8_t byte = state->hw_state.ps2_current_buffer_bit + 0x80;
+    state->debug_read(address, byte);
     return byte;
   }
   else {
@@ -74,6 +80,10 @@ void init_emulator(emulator_state **state, long clockspeed)
 
   (*state)->hw_state.video_buffer_bit_pos = 0;
   (*state)->hw_state.video_buffer_size = 0;
+
+  (*state)->hw_state.ps2_encoding_table_size = init_ps2_encodings(&((*state)->hw_state.ps2_encoding_table));
+  (*state)->hw_state.ps2_buffer = malloc(0);
+
 }
 
 
@@ -82,6 +92,10 @@ size_t exec_cpu_cycle(emulator_state **state)
   zusize cycles =  m6502_run((*state)->cpu, 1);
   usleep(cycles * (1000000 / (*state)->clockspeed));
   (*state)->passed_cycles += cycles;
+  int ps2_target_clockcycles = (*state)->clockspeed / 10000;// 10 MHz
+  if(((*state)->passed_cycles - ((*state)->passed_cycles % 10)) % ps2_target_clockcycles == 0) {
+    ps2_send_bit(state);
+  }
   return cycles;
 }
 
@@ -147,4 +161,30 @@ void vt100_add_bit(emulator_state **state, uint8_t data) {
   }
 }
 
+void ps2_send_bit(emulator_state **state) {
+  if((*state)->hw_state.ps2_skip_for_next == false) {
+    (*state)->hw_state.ps2_skip_for_next = true;
+  }
+  else {
+    if((*state)->hw_state.ps2_buffer_position != 0) {
+      if((*state)->hw_state.ps2_buffer_bit_position < 8) {
+        (*state)->hw_state.ps2_current_buffer_bit = (*state)->hw_state.ps2_buffer[(*state)->hw_state.ps2_buffer_position] & (0b00000001 << (*state)->hw_state.ps2_buffer_bit_position++);
+      }
+      else if((*state)->hw_state.ps2_buffer_bit_position == 8) {
+        (*state)->hw_state.ps2_current_buffer_bit = true; //parity bit
+        memcpy((*state)->hw_state.ps2_buffer, (*state)->hw_state.ps2_buffer +1, --(*state)->hw_state.ps2_buffer_position);
+        (*state)->hw_state.ps2_buffer_bit_position = 0;
+      }
+      m6502_nmi((*state)->cpu);
+    }
+  }
+}
 
+void ps2_add_char_to_buffer(emulator_state **state, char *ncurses_char_sequence) {
+  uint8_t * new_sequence;
+  int new_sequence_length = encode_ps2((*state)->hw_state.ps2_encoding_table, (*state)->hw_state.ps2_encoding_table_size, ncurses_char_sequence, &new_sequence);
+  
+  (*state)->hw_state.ps2_buffer = realloc((*state)->hw_state.ps2_buffer, (*state)->hw_state.ps2_buffer_position + new_sequence_length);
+  memcpy((*state)->hw_state.ps2_buffer + (*state)->hw_state.ps2_buffer_position, new_sequence, new_sequence_length);
+  (*state)->hw_state.ps2_buffer_position += new_sequence_length;
+}

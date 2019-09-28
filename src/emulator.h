@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "ps2.h"
 
 
 struct s_hardware_state {
@@ -45,9 +46,13 @@ struct s_hardware_state {
 
 
   /* PS/2 Keyboard Emulation */
-  char *ps2_buffer;
+  uint8_t *ps2_buffer;
   int ps2_buffer_position;
   int ps2_buffer_bit_position;
+  bool ps2_current_buffer_bit;
+  ps2_encoding *ps2_encoding_table;
+  int ps2_encoding_table_size;
+  bool ps2_skip_for_next;
 };
 
 typedef struct s_hardware_state hardware_state;
@@ -74,6 +79,8 @@ uint8_t tapeinterface_read(emulator_state **, bool);
 
 void vt100_add_bit(emulator_state **, uint8_t);
 
-void ps2_send_bit(emulator_state **, char);
+void ps2_send_bit(emulator_state **);
+
+void ps2_add_char_to_buffer(emulator_state **, char*);
 
 #endif

@@ -69,6 +69,7 @@ int main(int argc, char **argv)
     display_state(3,1,state);
     display_memory(11,1,state,page);
     display_tapeinterface(26, 60, state);
+    display_ps2(32,60, state);
 
     attron(A_UNDERLINE);
     attron(A_REVERSE);
@@ -77,46 +78,56 @@ int main(int argc, char **argv)
     attroff(A_UNDERLINE);
 
     display_vt100(35,1,state);
-
     if((ch = getch()) != ERR) {
-      if(ch == 'q')
-	      loop = false;
-      else if(ch == ' ')
-	      step = true;
-      else if(ch == 's') {
-	      step_count = 0;
-	      nodelay(stdscr, false);
+      if(ch == '\t') {
+        debug_interaction_mode = debug_interaction_mode ? false : true;
       }
-      else if(ch == 'c') {
-	      step_count = 1;
-	      nodelay(stdscr, true);
-      }
-      else if(ch == KEY_LEFT) {
-	      if(page > 0)
-	      page--;
-      }
-      else if(ch == KEY_RIGHT) {
-	      if(page < 0xff)
-	      page++;
-      }
-      else if(ch == KEY_UP) {
-	      if(page < 0xf0)
-	        page = (page & 0xf0) + 0x10;
+      else if(debug_interaction_mode) {
+        if(ch == 'q')
+          loop = false;
+        else if(ch == ' ')
+          step = true;
+        else if(ch == 's') {
+          step_count = 0;
+          nodelay(stdscr, false);
         }
-      else if(ch == KEY_DOWN) {
-	      if(page > (page & 0xf0))
-	      page = page & 0xf0;
-	      else if (page > 0)
-	      page -= 0x10;
+        else if(ch == 'c') {
+          step_count = 1;
+          nodelay(stdscr, true);
+        }
+        else if(ch == KEY_LEFT) {
+          if(page > 0)
+          page--;
+        }
+        else if(ch == KEY_RIGHT) {
+          if(page < 0xff)
+          page++;
+        }
+        else if(ch == KEY_UP) {
+          if(page < 0xf0)
+            page = (page & 0xf0) + 0x10;
+          }
+        else if(ch == KEY_DOWN) {
+          if(page > (page & 0xf0))
+          page = page & 0xf0;
+          else if (page > 0)
+          page -= 0x10;
+        }
+        else if(ch == 't') {
+          state->hw_state.tape_started = true;
+        }
+        else if(ch == 'r') {
+          state->hw_state.tape_started = false;
+          state->hw_state.tape_byte_position = 0;
+          state->hw_state.tape_bit_position = 0;
+        }
       }
-      else if(ch == 't') {
-	      state->hw_state.tape_started = true;
+      else {
+        ps2_add_char_to_buffer(&state, keyname(ch));
       }
-      else if(ch == 'r') {
-        state->hw_state.tape_started = false;
-        state->hw_state.tape_byte_position = 0;
-        state->hw_state.tape_bit_position = 0;
-      }
+
+
+        
     }
     i++;
     

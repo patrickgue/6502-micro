@@ -199,7 +199,16 @@ void display_vt100(int y, int x, emulator_state *state)
     }
 
   }
+}
 
+void display_ps2(int y, int x, emulator_state *state) {
+  attron(A_REVERSE);
+  mvprintw(y,x,"PS/2 Emulation");
+  attroff(A_REVERSE);
+
+  for(int i = 0; i < state->hw_state.ps2_buffer_position; i++) {
+    mvprintw(y + 1, x + i * 3, "%02x", state->hw_state.ps2_buffer[i]);
+  }
 }
 
 void debug_bus_read(uint16_t addr, uint8_t data)
