@@ -1,11 +1,20 @@
 #+TITLE:Memory Layout
 
+* Layout
 The memory layout is setup like this:
 
-| *Name*    | RAM   | Tape interface | ROM   |
-|-----------+-------+----------------+-------|
-| *Address* | $0000 | $F7FF          | $F800 |
-|-----------+-------+----------------+-------|
-| *Size*    | $F7FF | $0001          | $0800 |
-|-----------+-------+----------------+-------|
-| *r/w*     | r/w   | r/w            | r     |
+| *Name*    | RAM (free) | RAM (System) | PS/2  | VT100 | Tape interface | ROM   |
+|-----------+------------+--------------+-------+-------+----------------+-------|
+| *Address* | $0000      | $F400        | $F7FD | $F7FE | $F7FF          | $F800 |
+|-----------+------------+--------------+-------+-------+----------------+-------|
+| *Size*    | $F400      | $03FD        | $0001 | $0001 | $0001          | $0800 |
+|-----------+------------+--------------+-------+-------+----------------+-------|
+| *r/w*     | r/w        |              | r     | w     | r/w            | r     |
+
+
+* Notes
+ * The First 0xf400 bytes are freely available to programs with the exception of 0x00 to 0xff and 0x100 to 0x1ff for zeropage and stack respectively which have to be handled carefully
+ * The System RAM from 0xf400 to 0xf7fc is reserved for the operating system. The system memory is only separated logically and is not handled differently on a hardware level
+
+
+

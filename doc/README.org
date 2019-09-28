@@ -1,4 +1,5 @@
 #+TITLE:6502 Emulator Documentation
 
-1. Assembly   [[assembly.org]]
-2. Memory     [[memory.org]]
+1. Assembly            [[assembly.org]]
+2. Memory              [[memory.org]]
+3. Operating System    [[system.org]]
