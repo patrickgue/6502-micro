@@ -168,7 +168,7 @@ void ps2_send_bit(emulator_state **state) {
   else {
     if((*state)->hw_state.ps2_buffer_position != 0) {
       if((*state)->hw_state.ps2_buffer_bit_position < 8) {
-        (*state)->hw_state.ps2_current_buffer_bit = (*state)->hw_state.ps2_buffer[(*state)->hw_state.ps2_buffer_position] & (0b00000001 << (*state)->hw_state.ps2_buffer_bit_position++);
+        (*state)->hw_state.ps2_current_buffer_bit = ((*state)->hw_state.ps2_buffer[(*state)->hw_state.ps2_buffer_position] >> (*state)->hw_state.ps2_buffer_bit_position++) & 0b00000001;
       }
       else if((*state)->hw_state.ps2_buffer_bit_position == 8) {
         (*state)->hw_state.ps2_current_buffer_bit = true; //parity bit
