@@ -2,6 +2,10 @@
 
 * Description and History
 
+2019-09-29
+
+
+
 2019-09-18
 
 I came up with the idea of building my own 6502 based microcomputer. But I 
@@ -19,13 +23,23 @@ The emulator is based on the 6502 microprocesser emulator and /Zeta/ header
 library by /Manuel Sainz de Baranda y Goñi/([https://github.com/redcode/6502], 
 https://github.com/redcode/Z). The emulator is currently quite simple. In 
 addition of a wrapper for the CPU emulator I've implemented a small tool 
-which can load programs into memory before the system is started. 
+which can load programs into memory before the system is started to emulate 
+ROM. 
 
 There's a debugger implemented as a ncurses based TUI:
 
 [[./doc/screenshot.png]]
 
+The Emulator currently implements emulation for following hardware:
+ * 6502 CPU
+ * 63485 Bytes of RAM
+ * 2048 Bytes of ROM
+ * Tape loading interface
+ * VT100ish terminal
+   * In the current implementation it is accessed directly when writing to the bus, which of course is neither ideal nor flexible when using real hardware. This functionality will be changed to a full uart serial interface. I didn't yet decided, if I'll use a 6522 or connect it directly to the bus. 
+ * PS/2 Keyboard Interface
 
+The full documentation can be found here [[doc/README.org]]
 
 
 * The Assembler
