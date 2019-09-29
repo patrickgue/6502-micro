@@ -82,7 +82,7 @@ struct s_opcode {
 typedef struct s_opcode opcode;
 
 struct s_label {
-  char labelname[16];
+  char labelname[32];
   uint16_t pc;
   size_t size;
   bool rel;

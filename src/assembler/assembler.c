@@ -457,7 +457,6 @@ void add_label(char *line, uint16_t pc) {
   labels = realloc(labels, (labels_count+1) * sizeof(label));
   labels[labels_count].pc = pc;
   strcpy(labels[labels_count].labelname, ln);
-  free(ln);
   labels_count++;
 }
 
@@ -465,35 +464,34 @@ char* add_label_reference(char *line, uint16_t pc) {
   char *ln = malloc(strlen(line));
   char *tofree, *number_str, *output;
   uint16_t address;
-  label new_reference_label = {};
   strcpy(ln, line); 
   tofree = strdup(ln);
 
   char *cmd = strsep(&ln, " ");
   
+  
   /* remove brackets */
   ln++;
   ln[strlen(ln)-1] = '\0';
 
-  strcpy(new_reference_label.labelname, ln);
+  label_references = realloc(label_references, (++label_references_count) * sizeof(label) );
 
-  new_reference_label.pc = pc;
+  strcpy(label_references[label_references_count-1].labelname, ln);
+
+  label_references[label_references_count-1].pc = pc;
 
   if(is_relative_addr_op(cmd)) {
-    new_reference_label.rel = true;
-    new_reference_label.size = 1;
+    label_references[label_references_count-1].rel = true;
+    label_references[label_references_count-1].size = 1;
     output = malloc(8);
     sprintf(output, "%s $00", cmd);
   }
   else {
-    new_reference_label.rel = false;
-    new_reference_label.size = 2;
+    label_references[label_references_count-1].rel = false;
+    label_references[label_references_count-1].size = 2;
     output = malloc(10);
     sprintf(output, "%s $0000", cmd);
   }
-
-  label_references = realloc(label_references, ++label_references_count);
-  label_references[label_references_count-1] = new_reference_label;
 
   free(tofree);
 
@@ -504,8 +502,8 @@ char *remove_comment(char *line) {
   if(contains_single(line, ';')) {
     for(int i = 0; i < strlen(line); i++) {
       if(line[i] == ';') {
-	line[i] = '\0';
-	break;
+        line[i] = '\0';
+        break;
       }
     }
   }

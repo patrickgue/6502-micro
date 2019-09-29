@@ -31,8 +31,8 @@ NEMU_CFLAGS=-lncurses
 TARGET_ASM="bin/as65"
 TARGET_DASM="bin/das65"
 
-SRCS_EMU=src/emu.c src/emulator.c src/romloader.c src/helper.c libsrc/6502.c
-SRCS_NEMU=src/nemu.c src/assembler/disassembler.c src/nemu_debug.c src/emulator.c src/romloader.c src/helper.c  libsrc/6502.c
+SRCS_EMU=src/emu.c src/emulator.c src/romloader.c src/helper.c src/ps2.c libsrc/6502.c
+SRCS_NEMU=src/nemu.c src/assembler/disassembler.c src/nemu_debug.c src/emulator.c src/ps2.c src/romloader.c src/helper.c  libsrc/6502.c
 SRCS_ASM=src/assembler/assembler.c src/assembler/disassembler.c src/helper.c
 SRCS_DASM=src/assembler/disassembler_cli.c src/assembler/disassembler.c src/helper.c
 
