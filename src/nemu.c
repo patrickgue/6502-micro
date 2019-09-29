@@ -60,24 +60,32 @@ int main(int argc, char **argv)
     }
     erase();
     attron(A_UNDERLINE);
-    attron(A_REVERSE);
-    mvprintw(1,1,"%3s Debugger", debug_interaction_mode ? "-->" : "");
-    attroff(A_REVERSE);
+    mvprintw(1,(CWIDTH/2) - 14, "6502 Microcomputer Emulator");
     attroff(A_UNDERLINE);
-    display_disassemble(3,80,state);
-    display_rw_buffer(3,60);
-    display_state(3,1,state);
-    display_memory(11,1,state,page);
-    display_tapeinterface(26, 60, state);
-    display_ps2(32,60, state);
+    if (debug_interaction_mode) {
+      mvprintw(2,(CWIDTH/2) - 10, "press [h] for help");
+      attron(A_UNDERLINE);
+      attron(A_REVERSE);
+      mvprintw(3,1,"Debugger");
+      attroff(A_REVERSE);
+      attroff(A_UNDERLINE);
+      display_disassemble(5,80,state);
+      display_rw_buffer(5,60);
+      display_state(5,1,state);
+      display_memory(13,1,state,page);
+      display_tapeinterface(28, 60, state);
+      display_ps2(34,60, state);
+    }
+    else {
+      mvprintw(2,(CWIDTH/2) - 22, "press [tab] to switch back to the debugger");
+      attron(A_UNDERLINE);
+      attron(A_REVERSE);
+      mvprintw(3,1,"IO");
+      attroff(A_REVERSE);
+      attroff(A_UNDERLINE);
 
-    attron(A_UNDERLINE);
-    attron(A_REVERSE);
-    mvprintw(33,1,"%3s IO", debug_interaction_mode ? "" : "-->");
-    attroff(A_REVERSE);
-    attroff(A_UNDERLINE);
-
-    display_vt100(35,1,state);
+      display_vt100(5,1,state);
+    }
     if((ch = getch()) != ERR) {
       if(ch == '\t') {
         debug_interaction_mode = debug_interaction_mode ? false : true;
