@@ -2,14 +2,16 @@
 
 * Memory
 
-The Operating System lives in the upper part of memory; $F800 to $FFFF is the ROM, which stores all the routines which can be accessed by applications. The OS also has a part of RAM reserved for storing different values, e.g. buffers, for different purposes. These are defined as following:
+The Operating System lives in the upper part of memory; $F800 to $FFFF is the 
+ROM, which stores all the routines which can be accessed by applications. The 
+OS also has a part of RAM reserved for storing different values, e.g. buffers, 
+for different purposes. These are defined as following:
 
 
 ** PS/2
 
 The PS/2 input buffer is stored at $F7A0 to $F7FC. The first byte stores the
 length of the current scancode buffer. The second byte stores the current bit 
-position of the incoming bits. The third byte stores a /has been read/ flag, 
-which is incremented after a complete byte was received, and decremented after 
-a byte has been read. All the following bytes are reserved for the scancode 
-buffer. 90 Bytes give an approximatly 30 (ascii) character long buffer.
+position of the incoming bits. All the following bytes are reserved for the 
+scancode buffer. 91 Bytes give an approximatly 30 (ascii) character long 
+buffer.
