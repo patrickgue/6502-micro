@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   m6502_irq(state->cpu, false);
   m6502_reset(state->cpu);
   
-  bool loop = true, step = false;
+  bool loop = true, step = false, help = false;
   int i = 0, ch;
   uint8_t page = 0;
   
@@ -63,18 +63,24 @@ int main(int argc, char **argv)
     mvprintw(1,(CWIDTH/2) - 14, "6502 Microcomputer Emulator");
     attroff(A_UNDERLINE);
     if (debug_interaction_mode) {
-      mvprintw(2,(CWIDTH/2) - 10, "press [h] for help");
-      attron(A_UNDERLINE);
-      attron(A_REVERSE);
-      mvprintw(3,1,"Debugger");
-      attroff(A_REVERSE);
-      attroff(A_UNDERLINE);
-      display_disassemble(5,80,state);
-      display_rw_buffer(5,60);
-      display_state(5,1,state);
-      display_memory(13,1,state,page);
-      display_tapeinterface(28, 60, state);
-      display_ps2(34,60, state);
+      mvprintw(2,(CWIDTH/2) - 13, "press [h] to toggle help");
+      
+      if(!help) {
+        attron(A_UNDERLINE);
+        attron(A_REVERSE);
+        mvprintw(3,1,"Debugger");
+        attroff(A_REVERSE);
+        attroff(A_UNDERLINE);
+        display_disassemble(5,80,state);
+        display_rw_buffer(5,60);
+        display_state(5,1,state);
+        display_memory(13,1,state,page);
+        display_tapeinterface(28, 60, state);
+        display_ps2(34,60, state);
+      }
+      else {
+        display_help(3,1);
+      }
     }
     else {
       mvprintw(2,(CWIDTH/2) - 22, "press [tab] to switch back to the debugger");
@@ -102,6 +108,9 @@ int main(int argc, char **argv)
         else if(ch == 'c') {
           step_count = 1;
           nodelay(stdscr, true);
+        }
+        else if(ch == 'h') {
+          help = help ? false : true;
         }
         else if(ch == KEY_LEFT) {
           if(page > 0)
@@ -182,13 +191,46 @@ int init_menu() {
   return select_mode;
 }
 
+void display_help() 
+{
+  attron(A_UNDERLINE);
+  attron(A_REVERSE);
+  mvprintw(3,1,"Help");
+  attroff(A_REVERSE);
+  attroff(A_UNDERLINE);
 
+  attron(A_UNDERLINE);
+  mvprintw(5,1,"Modes");
+  attroff(A_UNDERLINE);
 
+  mvprintw(6,1, "[tab]\t\tSwitch between Terminal Emulation and Debugger");
 
+  attron(A_UNDERLINE);
+  mvprintw(8,1,"Debugger Functionality");
+  attroff(A_UNDERLINE);
 
+  mvprintw(9,1, "[q]\t\tQuit Emulator");
+  mvprintw(10,1, "[s]\t\tSwitch to stepping mode");
+  mvprintw(11,1, "[c]\t\tSwitch to continous mode");
+  mvprintw(12,1, "[space]\tStep over (only in stepping mode)");
+  
+  mvprintw(13,1, "[<-]\t\tShow previous memory page");
+  mvprintw(14,1, "[->]\t\tShow next memory page");
+  mvprintw(15,1, "[/\\]\t\tSkip to next page group");
+  mvprintw(16,1, "[\\/]\t\tSkip to previous page group");
 
+  attron(A_UNDERLINE);
+  mvprintw(18,1,"Hardware");
+  attroff(A_UNDERLINE);
 
-void license_warranty_info(char text[][80], int length) {
+  mvprintw(19,1, "[t]\t\tStart Tape");
+  mvprintw(20,1, "[r]\t\tRewind Tape");
+  
+
+}
+
+void license_warranty_info(char text[][80], int length) 
+{
   bool quit = false;
   int position = 0, ch;
   while(quit == false) {
