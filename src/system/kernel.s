@@ -18,20 +18,22 @@
 	.pc $f800
 kernel_main:
 	CLI			; enable irq interrupts
+	JSR [ps2_init]	; init PS/2 driver
+
+	;; test cpu behaivoiur
+
+
 	;; prepare tape loading
 	LDA #$00
 	STA $00
 	LDA #$02
 	STA $01			; store $0200 to $00 for the tape read to know where to put fetched data
-	;JSR [tape_read]		; call tape_read subroutine
 
-	LDA #$20 ; space
-	STA $0200
-loop:
-	JSR [print_char]
-	INC $0200
-	JMP [loop]
+	LDA #$04
+	STA $31
 	
+	JSR [tape_read]	; call tape_read subroutine
+	JMP $0200
 
 ;;; Tape read routines
 
@@ -105,14 +107,54 @@ pr_return:
 	RTS
 
 
+ps2_init:
+	LDA #$09
+	STA $f7a1
+	RTS
+
+;;; PS/2 interface driver   
+;;;
+;;; The PS/2 device clock triggers an interrupt on low on the clk line and 
+;;; either low or high on the data line which is then read by the following 
+;;; subroutine:
+;;;
+;;; (maximum of 77 clockcycles, 111 including interrupt handling. On a 2MHz 
+;;; CPU the 10 - 16KHz clock of the PS/2 device gives 125 - 200 clockcycles 
+;;; to handle the incoming bit)
+ps2_i_read_bit:
+	LDA $f7a1			; load bit counter
+	SEC
+	SBC #$01			; subtract 1
+	BEQ [ps2_i_skp_par]	; if bit counter - 1 is zero and therefore the parity bit, skip processing the incoming bit.
+	LDX $f7a0			; load byte position into X regs
+	CLC
+	ROL $f7a2,X			; Rotate left so 
+	LDA $f7fd 			; read bit from PS/2 interface
+	AND #$01			; only take first bit
+	ADC $f7a2,X			; add bit to current byte (and store in accumlator)
+	STA $f7a2,X			; store byte
+ps2_i_skp_par:			; in any case (parity bit or not)
+	DEC $f7a1			; decrement counter 
+	BNE [ps2_i_read_end]
+	INC $f7a0
+	JSR [ps2_init]		; reset bit counter
+ps2_i_read_end:
+	RTS
+
 
 
 ;;; Interrupt Handlers
 	.pc $ffa0
 nmi_handler:
-	
+	PHA
+	PHP
+	LDA $f7fd
+	BEQ [nmi_skip]
+	JSR [ps2_i_read_bit]
+nmi_skip:
 	INC $80
-	
+	PLP
+	PLA
 	RTI
 
 	
