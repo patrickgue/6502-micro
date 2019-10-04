@@ -209,8 +209,6 @@ void display_ps2(int y, int x, emulator_state *state) {
   for(int i = 0; i < state->hw_state.ps2_buffer_position; i++) {
     mvprintw(y + 1, x + i * 3, "%02x", state->hw_state.ps2_buffer[i]);
   }
-
-  mvprintw(y+2, x, "%s", state->hw_state.ps2_debug);
 }
 
 void debug_bus_read(uint16_t addr, uint8_t data)

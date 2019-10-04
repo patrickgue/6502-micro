@@ -86,8 +86,6 @@ void init_emulator(emulator_state **state, long clockspeed)
   
   HW_S.ps2_buffer = malloc(0);
   HW_S.ps2_buffer_position = 0;
-  strcpy(HW_S.ps2_debug, "");
-
 }
 
 
@@ -97,7 +95,7 @@ size_t exec_cpu_cycle(emulator_state **state)
   usleep(cycles * (1000000 / EMU_S->clockspeed));
   EMU_S->passed_cycles += cycles;
   int ps2_target_clockcycles = EMU_S->clockspeed / 10000;// 10 MHz
-  if((EMU_S->passed_cycles - (EMU_S->passed_cycles % 10)) % ps2_target_clockcycles == 0) {
+  if(EMU_S->passed_cycles % ps2_target_clockcycles < 2) {
     ps2_send_bit(state);
   }
   return cycles;
@@ -182,7 +180,6 @@ void ps2_send_bit(emulator_state **state) {
         HW_S.ps2_buffer_bit_position = 0;
         HW_S.ps2_skip_for_next = true;
       }
-      sprintf(HW_S.ps2_debug, "%s%d", HW_S.ps2_debug, HW_S.ps2_current_buffer_bit);
       m6502_nmi(EMU_S->cpu);
     }
   }

@@ -53,7 +53,6 @@ struct s_hardware_state {
   ps2_encoding *ps2_encoding_table;
   int ps2_encoding_table_size;
   bool ps2_skip_for_next;
-  char ps2_debug[128];
 };
 
 typedef struct s_hardware_state hardware_state;
