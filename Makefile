@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-CFLAGS=-I./include/Z -I./include/6502 -g
+CFLAGS=-I./include/Z -I./include/6502 -g -std=c17 -Wall
 #C65FLAGS=--target none --cpu 6502 -Cl
 
 CC=clang
