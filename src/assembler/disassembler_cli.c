@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     uint8_t *buffer;
     char *line;
 
-    int size = readfile((char**)&buffer, argv[1], true), i;
+    int size = readfile((char**)&buffer, argv[1], true), i = 0;
 
     while(i < size) {
         i+= disassemble_line(&line, buffer, i, false);

@@ -276,13 +276,13 @@ addressing_information calc_addressing_information(char number[18], bool force_w
     if(tmp_nr > 0xff || force_word) {
       if(contains_single(number, 'X'))
       	mode = absolute_x;
-      else if(contains_single(number, 'Y'))
+      else
 	      mode = absolute_y;
     }
     else {
       if(contains_single(number, 'X'))
 	      mode = zeropage_x;
-      else if(contains_single(number, 'Y'))
+      else
 	      mode = zeropage_y;
     }
   }
@@ -293,9 +293,8 @@ addressing_information calc_addressing_information(char number[18], bool force_w
   else if(contains(number, "(),") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
     if(contains_single(number, 'X'))
       mode = indirect_x;
-    else if(contains_single(number, 'Y'))
+    else
       mode = indirect_y;
-  
   }
 
   uint16_t nbr = parse_number(number, mode);
@@ -309,7 +308,7 @@ addressing_information calc_addressing_information(char number[18], bool force_w
 
 
 uint16_t parse_number(char number[18], addressing_mode mode) {
-  char buffer[18] = "", buffer2[18] = "";
+  char buffer[18] = "";
   int i;
   uint16_t parsed_number;
   switch(mode) {
@@ -462,8 +461,7 @@ void add_label(char *line, uint16_t pc) {
 
 char* add_label_reference(char *line, uint16_t pc) {
   char *ln = malloc(strlen(line));
-  char *tofree, *number_str, *output;
-  uint16_t address;
+  char *tofree, *output;
   strcpy(ln, line); 
   tofree = strdup(ln);
 
