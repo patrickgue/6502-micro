@@ -33,7 +33,7 @@
 void load_rom(char filename[64], emulator_state **state)
 {
   printf("Fake ROM by loading programs into specific locations in memory\n");
-  char *line_token, *filecontents, *word_token, *tofree_contents, *tofree_line;
+  char *line_token, *filecontents, *tofree_contents, *tofree_line;
 
   readfile(&filecontents, filename, false);
   tofree_contents = strdup(filecontents);

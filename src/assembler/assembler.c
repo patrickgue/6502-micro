@@ -101,7 +101,6 @@ int main(int argc, char **argv) {
   code_tf = strdup(assembly_code);
   line = strtok_r(assembly_code, "\n", &code_tf);
   while(line != NULL) {
-    char *tofree;
     bool force_word = false;
     line = remove_comment(line);
     line = trim(line);
@@ -273,14 +272,7 @@ size_t construct_binopt(char line[64], uint8_t **bytes, bool force_word_on_label
 
 addressing_information calc_addressing_information(char number[18], bool force_word) {
   addressing_mode mode;
-  if(!contains(number, "(),#XY")) {
-    uint16_t tmp_nr = parse_number(number, absolute);
-    if(tmp_nr > 0xff || force_word)
-      mode = absolute;
-    else
-      mode = zeropage;
-  }
-  else if(!contains(number, "()#") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
+  if(!contains(number, "()#") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
     uint16_t tmp_nr = parse_number(number,absolute_x);
     if(tmp_nr > 0xff || force_word) {
       if(contains_single(number, 'X'))
@@ -305,7 +297,13 @@ addressing_information calc_addressing_information(char number[18], bool force_w
     else
       mode = indirect_y;
   }
-
+  else /* if(!contains(number, "(),#XY")) */{
+    uint16_t tmp_nr = parse_number(number, absolute);
+    if(tmp_nr > 0xff || force_word)
+      mode = absolute;
+    else
+      mode = zeropage;
+  }
   uint16_t nbr = parse_number(number, mode);
   uint8_t lb = (nbr & 0x00ff);
   uint8_t hb = (nbr & 0xff00) >> 8;

@@ -47,6 +47,7 @@ typedef struct s_ps2_encoding ps2_encoding;
 
 static int scancodes_size = 101;
 static ps2_scancode scancodes[101] = {
+    {"NULL", 0x00, 0xF000}, // nonstandard character used if invalid character is received
     {" ", 0x52, 0xF052},
     {"1", 0x16, 0xF016},
     {"2", 0x1E, 0xF01E},

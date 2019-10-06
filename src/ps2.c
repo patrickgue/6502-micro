@@ -95,6 +95,7 @@ ps2_scancode get_scan_code(char* str) {
             return scancodes[i];
         }
     }
+    return scancodes[0];
 }
 
 size_t encode_ps2(ps2_encoding *encoding, int encoding_table_size, char *ncurses_str, uint8_t **target) {

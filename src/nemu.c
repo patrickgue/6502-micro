@@ -48,9 +48,7 @@ int main(int argc, char **argv)
     nodelay(stdscr, FALSE);
   
   clear();
-  while(loop) {
-    int cycles;
-    
+  while(loop) {    
     if(step_count == 1 || step) {
       rw_log log = {true, false, state->cpu->state.pc, 0};
       update_rw_buffer(log);
