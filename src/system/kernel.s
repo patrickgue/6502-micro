@@ -107,11 +107,6 @@ pr_return:
 	RTS
 
 
-ps2_init:
-	LDA #$09
-	STA $f7a1
-	RTS
-
 ;;; PS/2 interface driver   
 ;;;
 ;;; The PS/2 device clock triggers an interrupt on low on the clk line and 
@@ -121,26 +116,35 @@ ps2_init:
 ;;; (maximum of 77 clockcycles, 111 including interrupt handling. On a 2MHz 
 ;;; CPU the 10 - 16KHz clock of the PS/2 device gives 125 - 200 clockcycles 
 ;;; to handle the incoming bit)
-ps2_i_read_bit:
-	LDA $f7a1			; load bit counter
-	SEC
-	SBC #$01			; subtract 1
-	BEQ [ps2_i_skp_par]	; if bit counter - 1 is zero and therefore the parity bit, skip processing the incoming bit.
-	LDX $f7a0			; load byte position into X regs
-	CLC
-	ROL $f7a2,X			; Rotate left so 
-	LDA $f7fd 			; read bit from PS/2 interface
-	AND #$01			; only take first bit
-	ADC $f7a2,X			; add bit to current byte (and store in accumlator)
-	STA $f7a2,X			; store byte
-ps2_i_skp_par:			; in any case (parity bit or not)
-	DEC $f7a1			; decrement counter 
-	BNE [ps2_i_read_end]
-	INC $f7a0
-	JSR [ps2_init]		; reset bit counter
-ps2_i_read_end:
+ps2_buffer_size = $f7a0
+ps2_bit_counter = $f7a1
+ps2_buffer_pointer = $f7a2
+ps2_interface_address = $f7fd
+
+ps2_init:
+	LDA #$09
+	STA [ps2_bit_counter]
 	RTS
 
+ps2_i_read_bit:
+	LDA [ps2_bit_counter]		; load bit counter
+	SEC
+	SBC #$01					; subtract 1
+	BEQ [ps2_i_skp_par]			; if bit counter - 1 is zero and therefore the parity bit, skip processing the incoming bit.
+	LDX [ps2_buffer_size]		; load buffer size position into X regs
+	CLC
+	ROL [ps2_buffer_pointer],X	; Rotate left so 
+	LDA [ps2_interface_address] ; read bit from PS/2 interface
+	AND #$01					; only take first bit
+	ADC [ps2_buffer_pointer],X	; add bit to current byte (and store in accumlator)
+	STA [ps2_buffer_pointer],X	; store byte
+ps2_i_skp_par:					; in any case (parity bit or not)
+	DEC $f7a1					; decrement counter 
+	BNE [ps2_i_read_end]
+	INC [ps2_buffer_size]
+	JSR [ps2_init]				; reset bit counter
+ps2_i_read_end:
+	RTS
 
 
 ;;; Interrupt Handlers

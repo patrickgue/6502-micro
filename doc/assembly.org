@@ -29,10 +29,26 @@ accumlator           OPC
 
 ** .pc
 
-This opcodes sets the program counter. Must be defined on a single line.
+This pseudo opcode sets the program counter. Must be defined on a single line.
 
 #+BEGIN_SRC
 .pc $LLHH
+#+END_SRC
+
+** .byte
+This pseudo opcode adds a byte at the current program counter position to the program.
+This can be used to declare data inside the program.
+
+#+BEGIN_SRC
+.byte $LL
+#+END_SRC
+ 
+** .word
+This pseudo opcode adds a two-byte word at the current program counter position to the program.
+This can be used to declare data inside the program.
+
+#+BEGIN_SRC
+.word $LLHH
 #+END_SRC
 
 * Labels
@@ -44,11 +60,33 @@ labelname:
     ...
 #+END_SRC
 
+A label can be up to 31 characters long and must only consist of 
+alphanumerical characters, dashes and underscores. (This is not
+checked durring assembly, using other characters might result in 
+unexpected side effects)   
 
 They can be accessed in the code using square brackets:
 
 #+BEGIN_SRC
     OPC [labelname]
+#+END_SRC
+
+* Definitions
+
+Definitions can be used to store data, which might be reused at some other 
+point. It might be best compared to a constant or a preprocessing definition
+in C.
+
+They are defined as following:
+#+BEGIN_SRC
+definition = $1234
+#+END_SRC
+
+Definitions are treated exactly like labels. The same naming scheme applies and 
+their application is exactly the same:
+
+#+BEGIN_SRC
+    OPC [definition]
 #+END_SRC
 
 * Comments

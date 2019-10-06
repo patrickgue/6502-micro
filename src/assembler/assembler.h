@@ -43,7 +43,8 @@ enum e_line_type {
   op_with_label = 1,
   lbl = 2,
   pseudoop = 3,
-  skip = 4
+  skip = 4,
+  def = 5
 };
 
 typedef enum e_line_type line_type;
@@ -92,13 +93,13 @@ typedef struct s_label label;
 
 addressing_information calc_addressing_information(char[], bool);
 
-size_t construct_binopt(char [], uint8_t **);
+size_t construct_binopt(char [], uint8_t **, bool);
 
 uint16_t parse_number(char [], addressing_mode);
 
 line_type get_line_type(char line[]);
 
-void add_label(char*, uint16_t);
+void add_label(char*, uint16_t, bool);
 
 char *add_label_reference(char*, uint16_t);
 
