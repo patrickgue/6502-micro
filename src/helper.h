@@ -30,4 +30,5 @@ bool contains(char *str, char *search);
 char *trim(char*);
 int strpos(char *str, char *target);
 unsigned long get_timestamp_ms();
+char *str_sep(char **, char);
 #endif /* HELPER_H */

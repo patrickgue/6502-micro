@@ -140,3 +140,22 @@ unsigned long get_timestamp_ms()
   gettimeofday(&tp, NULL);
   return tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
+
+
+char *str_sep(char **src, char delim) {
+  if(*src == NULL || **src == '\0') {
+    return NULL;
+  }
+  char *buffer = malloc(strlen(*src) * sizeof(char));
+  int i = 0;
+  while((*src)[0] != delim && (*src)[0] != '\0') {
+    buffer[i++] = (*src)[0];
+    (*src)++;
+  }
+  buffer[i] = '\0';
+  if(*src[0] != '\0') {
+    (*src)++;
+  }
+  buffer = realloc(buffer, (sizeof(buffer) + 1) * sizeof(char));
+  return buffer;
+}
