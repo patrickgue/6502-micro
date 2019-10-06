@@ -18,7 +18,5 @@ along with this programs.  If not, see <https://www.gnu.org/licenses/>.
 It is forbidden to distribute and/or modify the following source files
 without adhering to the aforementioned conditions:
 
-loader.s
-loadrom.tbl
-testprog.s
-testprogram.c
+rom.tbl
+tape.tbl
