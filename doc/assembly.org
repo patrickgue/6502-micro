@@ -32,7 +32,7 @@ accumlator           OPC
 This pseudo opcode sets the program counter. Must be defined on a single line.
 
 #+BEGIN_SRC
-.pc $LLHH
+.pc $HHLL
 #+END_SRC
 
 ** .byte
@@ -48,7 +48,7 @@ This pseudo opcode adds a two-byte word at the current program counter position 
 This can be used to declare data inside the program.
 
 #+BEGIN_SRC
-.word $LLHH
+.word $HHLL
 #+END_SRC
 
 * Labels
