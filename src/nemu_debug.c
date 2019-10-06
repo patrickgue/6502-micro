@@ -128,11 +128,12 @@ display_state(int y, int x, emulator_state* state)
   attroff(A_REVERSE);
   mvprintw(y + 1,
            x,
-           "A: %02x  X: %02x  Y: %02x  PC: %04x",
+           "A: %02x  X: %02x  Y: %02x  PC: %04x  Cycles: %ul",
            state->cpu->state.a,
            state->cpu->state.x,
            state->cpu->state.y,
-           state->cpu->state.pc);
+           state->cpu->state.pc,
+           state->passed_cycles);
 
   attron(A_REVERSE);
   mvprintw(y + 3, x, "Flags");
