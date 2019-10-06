@@ -93,7 +93,7 @@ exec_cpu_cycle(emulator_state** state)
   usleep(cycles * (1000000 / EMU_S->clockspeed));
   EMU_S->passed_cycles += cycles;
   int ps2_target_clockcycles = EMU_S->clockspeed / 10000; // 10 MHz
-  if (EMU_S->passed_cycles % ps2_target_clockcycles < 2) {
+  if (EMU_S->passed_cycles % ps2_target_clockcycles <= 7) {
     ps2_send_bit(state);
   }
   return cycles;
