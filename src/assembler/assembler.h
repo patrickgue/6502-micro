@@ -18,6 +18,7 @@
 #ifndef ASSEMBLER_H
 #define ASSEMBLER_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 /*
@@ -38,7 +39,8 @@ zpg,X		....	zeropage, X-indexed	OPC $LL,X	 	operand is zeropage address; effecti
 zpg,Y		....	zeropage, Y-indexed	OPC $LL,Y	 	operand is zeropage address; effective address is address incremented by Y without carry **
 */
 
-enum e_line_type {
+enum e_line_type
+{
   operation = 0,
   op_with_label = 1,
   lbl = 2,
@@ -49,7 +51,8 @@ enum e_line_type {
 
 typedef enum e_line_type line_type;
 
-enum e_addressing_mode {
+enum e_addressing_mode
+{
   absolute = 0,
   absolute_x = 1,
   absolute_y = 2,
@@ -62,12 +65,13 @@ enum e_addressing_mode {
   zeropage = 9,
   zeropage_x = 10,
   zeropage_y = 11,
-  accumlator = 12,
+  accumlator = 12
 };
 
 typedef enum e_addressing_mode addressing_mode;
 
-struct s_addressing_information {
+struct s_addressing_information
+{
   addressing_mode mode;
   uint8_t lbyte;
   uint8_t hbyte;
@@ -75,14 +79,16 @@ struct s_addressing_information {
 
 typedef struct s_addressing_information addressing_information;
 
-struct s_opcode {
+struct s_opcode
+{
   uint8_t code;
   size_t bytes;
 };
 
 typedef struct s_opcode opcode;
 
-struct s_label {
+struct s_label
+{
   char labelname[32];
   uint16_t pc;
   size_t size;
@@ -93,81 +99,79 @@ typedef struct s_label label;
 
 addressing_information calc_addressing_information(char[], bool);
 
-size_t construct_binopt(char [], uint8_t **, bool);
+size_t construct_binopt(char[], uint8_t **, bool);
 
-uint16_t parse_number(char [], addressing_mode);
+uint16_t parse_number(char[], addressing_mode);
 
 line_type get_line_type(char line[]);
 
-void add_label(char*, uint16_t, bool);
+void add_label(char *, uint16_t, bool);
 
-char *add_label_reference(char*, uint16_t);
+char *add_label_reference(char *, uint16_t);
 
 char *remove_comment(char *);
 
 static char opcode_label_table[56][4] =
-  {
-   "ADC",
-   "AND",
-   "ASL",
-   "BCC",
-   "BCS",
-   "BEQ",
-   "BIT",
-   "BMI",
-   "BNE",
-   "BPL",
-   "BRK",
-   "BVC",
-   "BVS",
-   "CLC",
-   "CLD",
-   "CLI",
-   
-   "CLV",
-   "CMP",
-   "CPX",
-   "CPY",
-   "DEC",
-   "DEX",
-   "DEY",
-   "EOR",
-   "INC",
-   "INX",
-   "INY",
-   "JMP",
-   "JSR",
-   "LDA",
-   "LDX",
-   "LDY",
-   
-   "LSR",
-   "NOP",
-   "ORA",
-   "PHA",
-   "PHP",
-   "PLA",
-   "PLP",
-   "ROL",
-   "ROR",
-   "RTI",
-   "RTS",
-   "SBC",
-   "SEC",
-   "SED",
-   "SEI",
-   "STA",
-   
-   "STX",
-   "STY",
-   "TAX",
-   "TAY",
-   "TSX",
-   "TXA",
-   "TXS",
-   "TYA"
-  };
+    {
+        "ADC",
+        "AND",
+        "ASL",
+        "BCC",
+        "BCS",
+        "BEQ",
+        "BIT",
+        "BMI",
+        "BNE",
+        "BPL",
+        "BRK",
+        "BVC",
+        "BVS",
+        "CLC",
+        "CLD",
+        "CLI",
 
+        "CLV",
+        "CMP",
+        "CPX",
+        "CPY",
+        "DEC",
+        "DEX",
+        "DEY",
+        "EOR",
+        "INC",
+        "INX",
+        "INY",
+        "JMP",
+        "JSR",
+        "LDA",
+        "LDX",
+        "LDY",
+
+        "LSR",
+        "NOP",
+        "ORA",
+        "PHA",
+        "PHP",
+        "PLA",
+        "PLP",
+        "ROL",
+        "ROR",
+        "RTI",
+        "RTS",
+        "SBC",
+        "SEC",
+        "SED",
+        "SEI",
+        "STA",
+
+        "STX",
+        "STY",
+        "TAX",
+        "TAY",
+        "TSX",
+        "TXA",
+        "TXS",
+        "TYA"};
 
 static uint8_t opcode_table[56][13] =
   {
@@ -238,14 +242,12 @@ static uint8_t opcode_table[56][13] =
  /* abs   absx  absy  imm   impl  ind   indx  indy  rel   zpg   zpgx  zpgy  acc*/
   };
 
-
-
-static char implied_ops [26][4] = {"BRK", "RTI", "RTS", "PHP", "CLC", "PLP", "SEC", "PHA", "CLI", "PLA", "SEI", "DEY", "TYA", "TAY", "CLV", "INY", "CLD", "INX", "SED", "TXA", "TXS", "TAX", "TSX", "DEX", "NOP"};
+static char implied_ops[26][4] = {"BRK", "RTI", "RTS", "PHP", "CLC", "PLP", "SEC", "PHA", "CLI", "PLA", "SEI", "DEY", "TYA", "TAY", "CLV", "INY", "CLD", "INX", "SED", "TXA", "TXS", "TAX", "TSX", "DEX", "NOP"};
 static int implied_ops_count = 26;
 
 bool is_implied_addr_op(char *);
 
-static char accum_ops [4][4] = {"ASL", "ROL", "LSR", "ROR"};
+static char accum_ops[4][4] = {"ASL", "ROL", "LSR", "ROR"};
 static int accum_ops_count = 4;
 
 bool is_accum_addr_op(char *);
@@ -258,7 +260,7 @@ bool is_relative_addr_op(char *);
 static char force_word_ops[2][4] = {"JMP", "JSR"};
 static int force_word_ops_count = 2;
 
-bool is_force_word_op(char*);
+bool is_force_word_op(char *);
 
 /*                                abs abx aby imm imp ind inx iny rel zpg zpx zpy acc*/
 static int op_address_size[13] = {3,  3,  3,  2,  1,  3,  2,  2,  2,  2,  2,  2,  1};

@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
   char *assembly_code_filename;
   char *binary_output_filename;
 
+  /* parsing arguments */
   while ((opt = getopt(argc, argv, "vli:o:")) != -1) {
     switch (opt) {
       case 'l':
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
           usage();
           return -1;
         }
-        assembly_code_filename = malloc(strlen(optarg) + 1);
+        assembly_code_filename = (char*) malloc(strlen(optarg) + 1);
         strcpy(assembly_code_filename, optarg);
         break;
       case 'o':
@@ -64,7 +65,7 @@ int main(int argc, char **argv) {
           usage();
           return -1;
         }
-        binary_output_filename = malloc(strlen(optarg) + 1);
+        binary_output_filename = (char*) malloc(strlen(optarg) + 1);
         strcpy(binary_output_filename, optarg);
         break;
       default:
@@ -73,39 +74,36 @@ int main(int argc, char **argv) {
     }
   }
 
+  /* check if both input and output file were loaded correctly */
   if(assembly_code_filename == NULL || binary_output_filename == NULL) {
     usage();
     return -1;
   }
 
-  
-  
-
-  char *assembly_code, *code_tf, *line;
+  char *assembly_code, *code_brkb, *line;
   size_t assembly_code_size = readfile(&assembly_code, assembly_code_filename, false);
 
   uint32_t program_counter = 0;
   uint16_t pc_offset = 0;
   bool pc_offset_set = false;
-  uint8_t *buffer = (uint8_t*) malloc(0);
-  uint8_t *bytes = malloc(3);
 
-  char *op, *label_name;
-  
+  uint8_t *buffer = (uint8_t*) malloc(0);
+  uint8_t *bytes = (uint8_t*) malloc(3);
+
   labels = malloc(0);
   label_references = malloc(0);
-  
+
   if(assembly_code_size == 0)
     return 1;
 
-  code_tf = strdup(assembly_code);
-  line = strtok_r(assembly_code, "\n", &code_tf);
+  line = strtok_r(assembly_code, "\n", &code_brkb);
   while(line != NULL) {
+    char *pseudo_op, *label_name;
     bool force_word = false;
-    line = remove_comment(line);
-    line = trim(line);
+    line = trim(remove_comment(line));
+
     if(verbose_flag) { printf("\"%s\"\n", line); }
-    size_t op_size;
+
     line_type current_line_type = get_line_type(line);
     switch(current_line_type) {
     case op_with_label:
@@ -115,9 +113,8 @@ int main(int argc, char **argv) {
 	      strcpy(line, add_label_reference(line, program_counter));
         if (verbose_flag) { printf("tmp w/o label: %s\n", line); }
       }
-      else {}
 
-      op_size = construct_binopt(line, &bytes, force_word);
+      size_t op_size = construct_binopt(line, &bytes, force_word);
     
       if(verbose_flag) {
         printf("(%zu) %02x ", op_size, bytes[0]);
@@ -129,26 +126,26 @@ int main(int argc, char **argv) {
       }
 
       program_counter += op_size;
-      buffer = realloc(buffer, program_counter);
+      buffer = (uint8_t*) realloc(buffer, program_counter * sizeof(uint8_t));
       for(int i = 0; i < op_size; i++) {
 	      buffer[program_counter - op_size + i] = bytes[i];
       }
 
       break;
     case pseudoop:
-      op = str_sep(&line, ' ');
-      if(strcmp(op, ".pc") == 0) {
+      pseudo_op = str_sep(&line, ' ');
+      if(strcmp(pseudo_op, ".pc") == 0) {
         program_counter = parse_number(str_sep(&line, ' '), absolute);
         if(!pc_offset_set) {
           pc_offset = program_counter;
           pc_offset_set = true;
         }
       }
-      else if(strcmp(op, ".byte") == 0) {
+      else if(strcmp(pseudo_op, ".byte") == 0) {
         buffer[program_counter] = parse_number(line, zeropage) & 0x00ff;
         program_counter++;
       }
-      else if(strcmp(op, ".word") == 0) {
+      else if(strcmp(pseudo_op, ".word") == 0) {
         buffer[program_counter] = (parse_number(line, absolute) & 0x00ff);
         buffer[program_counter + 1] = (parse_number(line, absolute) & 0xff00) >> 8;
         program_counter += 2;
@@ -163,9 +160,12 @@ int main(int argc, char **argv) {
       add_label(trim(label_name), parse_number(trim(line),absolute), false);
       break;
     case skip:
+      /* skip to next line if current line is empty */
       break;
     }
-    line = strtok_r(NULL, "\n", &code_tf);
+
+    /* fetch next line */
+    line = strtok_r(NULL, "\n", &code_brkb);
   }
 
 
@@ -184,6 +184,8 @@ int main(int argc, char **argv) {
       }
     }
   }
+
+  /* print labels, label references and disassembled code */
   if(verbose_flag) {
     printf("Labels:\n");
     for(int i = 0; i < labels_count; i++) {
@@ -204,13 +206,15 @@ int main(int argc, char **argv) {
     uint32_t i = pc_offset, pc_add;
     
     do {
-      char *line;
-      pc_add = disassemble_line(&line, buffer, i, false);
-      printf("%s\n", line);
+      char *line_print;
+      pc_add = disassemble_line(&line_print, buffer, i, false);
+      printf("%s\n", line_print);
       i += pc_add;
-      free(line);
+      free(line_print);
     } while( pc_add != 0 && i <= program_counter);
   }
+
+  /* save assembled program */
   FILE *f = fopen(binary_output_filename, "wb");
   fwrite(buffer + pc_offset, 1, program_counter - pc_offset , f);
   fclose(f);
@@ -220,15 +224,16 @@ int main(int argc, char **argv) {
   free(labels);
   free(label_references);
   free(bytes);
+  free(line);
   return 0;
 }
 
 
 size_t construct_binopt(char line[64], uint8_t **bytes, bool force_word_on_label) {
-  char *cmd = malloc(4);
+  char *opc_label = malloc(4);
   addressing_information addr_info = {0, 0, 0};
   if(!contains_single(line, ' ')) {
-    strcpy(cmd, line);
+    strcpy(opc_label, line);
     for(int i = 0; i < implied_ops_count; i++) {
       if(strcmp(line, implied_ops[i]) == 0)
 	      addr_info.mode = implied;
@@ -241,17 +246,17 @@ size_t construct_binopt(char line[64], uint8_t **bytes, bool force_word_on_label
   else {
     char *tofree;
     tofree = strdup(line);
-    cmd = strsep(&line, " ");
-    bool force_word = force_word_on_label || is_force_word_op(cmd);
+    opc_label = str_sep(&line, ' ');
+    bool force_word = force_word_on_label || is_force_word_op(opc_label);
     addr_info = calc_addressing_information(line, force_word);
-    if(is_relative_addr_op(cmd)) {
+    if(is_relative_addr_op(opc_label)) {
       addr_info.mode = relative;
     }
   }
 
   int opindex;
   for(opindex = 0; opindex < 56; opindex++) {
-    if(strcmp(opcode_label_table[opindex], cmd) == 0) {
+    if(strcmp(opcode_label_table[opindex], opc_label) == 0) {
       break;
     }
   }
@@ -266,10 +271,13 @@ size_t construct_binopt(char line[64], uint8_t **bytes, bool force_word_on_label
   if(op_size > 2) {
     (*bytes)[2] = addr_info.hbyte;
   }
+  free(opc_label);
   return op_size;
 }
 
-
+/* calculates addressing mode by checking if adressing mode specific character
+   sequences are available. Then calls parse_number and returning 
+   addressing_information including both addressing mode and parsed number */
 addressing_information calc_addressing_information(char number[18], bool force_word) {
   addressing_mode mode;
   if(!contains(number, "()#") && (contains_single(number, 'X') || contains_single(number, 'Y'))) {
@@ -313,7 +321,7 @@ addressing_information calc_addressing_information(char number[18], bool force_w
   return info;
 }
 
-
+/* removes any addressing mode specific syntax and parses number */
 uint16_t parse_number(char number[18], addressing_mode mode) {
   char buffer[18] = "";
   int i;
@@ -393,7 +401,7 @@ uint16_t parse_number(char number[18], addressing_mode mode) {
   return parsed_number;
 }
 
-
+/* returns line type by searching for specific keywords */
 line_type get_line_type(char line[64]) {
   if(strlen(line) == 0) {
     return skip;
@@ -415,36 +423,36 @@ line_type get_line_type(char line[64]) {
   return operation;
 }
 
-bool is_implied_addr_op(char *cmd) {
+bool is_implied_addr_op(char *opc_label) {
   for(int i = 0; i < implied_ops_count; i++) {
-    if(strcmp(cmd, implied_ops[i]) == 0) {
+    if(strcmp(opc_label, implied_ops[i]) == 0) {
       return true;
     }
   }
   return false;
 }
 
-bool is_accum_addr_op(char *cmd) {
+bool is_accum_addr_op(char *opc_label) {
   for(int i = 0; i < accum_ops_count; i++) {
-    if(strcmp(cmd, accum_ops[i]) == 0) {
+    if(strcmp(opc_label, accum_ops[i]) == 0) {
       return true;
     }
   }
   return false;
 }
 
-bool is_relative_addr_op(char *cmd) {
+bool is_relative_addr_op(char *opc_label) {
   for(int i = 0; i < relative_ops_count; i++) {
-    if(strcmp(cmd, relative_ops[i]) == 0) {
+    if(strcmp(opc_label, relative_ops[i]) == 0) {
       return true;
     }
   }
   return false;
 }
 
-bool is_force_word_op(char *cmd) {
+bool is_force_word_op(char *opc_label) {
   for(int i = 0; i < force_word_ops_count; i++) {
-    if(strcmp(cmd, force_word_ops[i]) == 0) {
+    if(strcmp(opc_label, force_word_ops[i]) == 0) {
       return true;
     }
   }
@@ -470,12 +478,14 @@ void add_label(char *line, uint16_t pc, bool trim_column) {
   labels_count++;
 }
 
+/* stores referenced label and returns parsable line containing a temorary
+   value. */
 char* add_label_reference(char *line, uint16_t pc) {
   char *ln = malloc(strlen(line) + 1);
   char *output;
   strcpy(ln, line); 
   
-  char *cmd = trim(str_sep(&ln, '['));
+  char *opc_label = trim(str_sep(&ln, '['));
   char *label_name = str_sep(&ln, ']');
 
   label_references = realloc(label_references, (++label_references_count) * sizeof(label) );
@@ -484,17 +494,17 @@ char* add_label_reference(char *line, uint16_t pc) {
 
   label_references[label_references_count-1].pc = pc;
 
-  if(is_relative_addr_op(cmd)) {
+  if(is_relative_addr_op(opc_label)) {
     label_references[label_references_count-1].rel = true;
     label_references[label_references_count-1].size = 1;
     output = malloc((strlen(line) - strlen(label_name) + 3 + strlen(ln) + 1) * sizeof(char));
-    sprintf(output, "%s $00%s", cmd, strlen(ln) == 0 ? "" : ln);
+    sprintf(output, "%s $00%s", opc_label, strlen(ln) == 0 ? "" : ln);
   }
   else {
     label_references[label_references_count-1].rel = false;
     label_references[label_references_count-1].size = 2;
     output = malloc((strlen(line) - strlen(label_name) + 5 + strlen(ln) + 1) * sizeof(char));
-    sprintf(output, "%s $0000%s", cmd, strlen(ln) == 0 ? "" : ln);
+    sprintf(output, "%s $0000%s", opc_label, strlen(ln) == 0 ? "" : ln);
   }
 
 
