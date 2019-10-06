@@ -144,7 +144,12 @@ main(int argc, char** argv)
       case pseudoop:
         pseudo_op = str_sep(&line, ' ');
         if (strcmp(pseudo_op, ".pc") == 0) {
-          program_counter = parse_number(str_sep(&line, ' '), absolute);
+          int new_program_counter = parse_number(str_sep(&line, ' '), absolute);
+          if(new_program_counter < program_counter) {
+            printf("Program Counter Error: Can't set new program counter lower than current program counter.");
+            return -1;
+          }
+          program_counter = new_program_counter;
           if (!pc_offset_set) {
             pc_offset = program_counter;
             pc_offset_set = true;
