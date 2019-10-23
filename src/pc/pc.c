@@ -23,6 +23,7 @@
 
 #include "../helper.h"
 #include "token.h"
+#include "tree.h"
 #include "pc.h"
 
 
@@ -37,7 +38,7 @@ main(int argc, char **argv)
   readfile(&buffer, argv[1], false);
   token *tokens;
   int tokens_count = tokenize(buffer, &tokens);
-  for(int i = 0; i < tokens_count; i++) {
+  /*for(int i = 0; i < tokens_count; i++) {
     switch(tokens[i].type) {
     case PREPR:
       printf("PREPR(%s)\n", tokens[i].text);
@@ -96,7 +97,13 @@ main(int argc, char **argv)
     default:
       break;
     }
-  }
+  }*/
+
+  tree_scope *root_scope = (tree_scope*) malloc(sizeof(tree_scope));
+  root_scope->statements = malloc(0);
+  root_scope->statements_length = 0;
+  build_tree(&root_scope, tokens, tokens_count);
+  
 }
 
 

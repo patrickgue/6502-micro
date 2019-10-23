@@ -1,2 +1,8 @@
+alpha = 0;
 let a = 1 + 2;
-let b = 2 * 3;
+let b = 2 - 3;
+let c = 3 * 4;
+let d = 4 / 5;
+let e = 5 % 6;
+
+let f = 5 + 3 - 2;

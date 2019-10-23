@@ -28,7 +28,7 @@ typedef enum e_token_type token_type;
 
 static char token_type_regex_str[18][32] = {
     /* PREPR       */ "(#[a-z]*)",
-    /* ARRITH      */ "([+\\-\\*\\/%])",
+    /* ARRITH      */ "([-+\\*\\/%])",
     /* ASSING      */ "(=)",
     /* FUNC        */ "(func)",
     /* IF          */ "(if)",

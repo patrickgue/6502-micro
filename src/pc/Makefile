@@ -2,7 +2,7 @@ CFLAGS=-I../ -g -Wall
 
 
 TARGET=pc
-SRCS=pc.c token.c ../helper.c
+SRCS=pc.c token.c tree.c ../helper.c
 OBJS=$(SRCS:.c=.o)
 
 $(TARGET):$(OBJS)

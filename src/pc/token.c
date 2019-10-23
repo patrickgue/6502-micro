@@ -55,10 +55,6 @@ tokenize(char* code, token** target_tokens)
         target_tokens_size++;
         code += matches[0].rm_eo - matches[0].rm_so;
         code = trim(code);
-        printf("%s / %d (%d)\n",
-               (*target_tokens)[target_tokens_size - 1].text,
-               (*target_tokens)[target_tokens_size - 1].type,
-               token_text_size);
         token_found = true;
         break;
       }
