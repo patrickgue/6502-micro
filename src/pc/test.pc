@@ -1,0 +1,8 @@
+#pc 0x0200
+
+func main(let argc, let argv) {
+    let a = 0x20;
+    let b = 30;
+    let c = "Hello World";
+    a + b
+}
