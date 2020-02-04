@@ -93,7 +93,7 @@ exec_cpu_cycle(emulator_state** state)
   usleep(cycles * (1000000 / EMU_S->clockspeed));
   EMU_S->passed_cycles += cycles;
   int ps2_target_clockcycles = EMU_S->clockspeed / 10000; // 10 MHz
-  if (EMU_S->passed_cycles % ps2_target_clockcycles <= 7) {
+  if (EMU_S->passed_cycles % ps2_target_clockcycles < 7) {
     ps2_send_bit(state);
   }
   return cycles;
@@ -191,8 +191,24 @@ ps2_send_bit(emulator_state** state)
 }
 
 void
-ps2_add_char_to_buffer(emulator_state** state, char* ncurses_char_sequence)
+ps2_add_char_to_buffer(emulator_state** state, int chr, char* ncurses_char_sequence)
 {
+  switch (chr) {
+  case 0x09:
+    strcpy(ncurses_char_sequence, "\t");
+    break;
+  case 0x0a:
+    strcpy(ncurses_char_sequence, "\n");
+    break;
+  case 0x7f:
+    strcpy(ncurses_char_sequence, "\x08");
+    break;
+  case 0x14a:
+    strcpy(ncurses_char_sequence, "\x7f");
+    break;
+  default:
+    break;
+  }
   uint8_t* new_sequence;
   int new_sequence_length = encode_ps2(HW_S.ps2_encoding_table,
                                        HW_S.ps2_encoding_table_size,

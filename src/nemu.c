@@ -125,7 +125,7 @@ main(int argc, char** argv)
           state->hw_state.tape_bit_position = 0;
         }
       } else {
-        ps2_add_char_to_buffer(&state, keyname(ch));
+        ps2_add_char_to_buffer(&state, ch, keyname(ch));
       }
     }
     i++;

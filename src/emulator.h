@@ -91,6 +91,6 @@ void
 ps2_send_bit(emulator_state**);
 
 void
-ps2_add_char_to_buffer(emulator_state**, char*);
+ps2_add_char_to_buffer(emulator_state**, int, char*);
 
 #endif
