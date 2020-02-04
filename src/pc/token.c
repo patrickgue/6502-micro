@@ -25,6 +25,49 @@
 
 #include "token.h"
 
+int 
+prepare_token_scope_tree(token_scope_tree **token_tree, token* tokens, int tokens_start, int tokens_end, bool ignore_first)
+{
+  int i;
+  (*token_tree) = (token_scope_tree*) malloc(sizeof(token_scope_tree));
+  (*token_tree)->elements = malloc(0);
+  (*token_tree)->elements_size = 0;
+  for(i = tokens_start; i < tokens_end; i++) {
+    token_scope_tree_element *new_element = (token_scope_tree_element *) malloc(sizeof(token_scope_tree_element));
+    new_element->atoken = &tokens[i];
+    if( (tokens[i].type == WHILE || tokens[i].type == FUNC || tokens[i].type == IF) && ignore_first == false) {
+      int scope_open_count = 0, scope_index = i;
+      bool first_scope_open_set = false;
+      while ( (scope_open_count != 0 || first_scope_open_set == false) && scope_index < tokens_end) {
+        if (tokens[scope_index].type == SCOPE_OPEN) {
+          scope_open_count++;
+          first_scope_open_set = true;
+        } else if (tokens[scope_index].type == SCOPE_CLOSE) {
+          scope_open_count--;
+        }
+        scope_index++;
+      }
+      new_element->type = TST_TREE;
+      i = prepare_token_scope_tree(&new_element->tree, tokens, i+1, scope_index-1, true)-1;
+    }
+    else if(tokens[i].type == ARG_OPEN) {
+      int j = i;
+      for(; tokens[j].type != ARG_CLOSE;j++);
+      
+      new_element->type = TST_ARGS;
+      i = prepare_token_scope_tree(&new_element->tree, tokens, i+1, j+1, false);
+    }
+    else {
+      new_element->type = TST_TOKEN;
+    }
+    (*token_tree)->elements = (token_scope_tree_element*) realloc((*token_tree)->elements, sizeof(token_scope_tree_element) * ( (*token_tree)->elements_size + 1));
+    (*token_tree)->elements[(*token_tree)->elements_size] = *new_element;
+    (*token_tree)->elements_size++;
+    ignore_first = false;
+  }
+  return i;
+}
+
 int
 tokenize(char* code, token** target_tokens)
 {

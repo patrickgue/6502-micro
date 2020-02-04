@@ -1,8 +1,65 @@
-#pc 0x0200
+func test(let a, let b) {
+    let c = a + b;
+}
+
+func helloworld(let str) {
+    str = str + "abc";
+    print(str);
+    let i = 100;
+    while(i eqzero) {
+        print(str);
+        i = i - 1
+    }
+}
+
+func hello_world2(let str) {
+    str = str + "abc";
+    print(str);
+    let i = 100;
+    while(i eqzero) {
+        print(str);
+        i = i - 1
+    }
+}
+
+func hello_world3(let str) {
+    str = str + "abc";
+    print(str);
+    let i = 100;
+    while(i eqzero) {
+        print(str);
+        i = i - 1
+    }
+}
+
+func hello_world4(let str) {
+    str = str + "abc";
+    print(str);
+    let i = 100;
+    while(i eqzero) {
+        print(str);
+        i = i - 1
+    }
+}
+
+func hello_world5(let str) {
+    str = str + "abc";
+    print(str);
+    let i = 100;
+    while(i eqzero) {
+        print(str);
+        i = i - 1
+    }
+}
 
 func main(let argc, let argv) {
-    let a = 0x20;
-    let b = 30;
-    let c = "Hello World";
-    a + b
+    let a = 1;
+    let b = a -1;
+    
+    if(a - 5) {
+        let c = 5;
+        test(1,b);
+    }
+    let a = 0;
+    hello_world ("TEST");
 }

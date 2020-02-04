@@ -38,66 +38,7 @@ main(int argc, char **argv)
   readfile(&buffer, argv[1], false);
   token *tokens;
   int tokens_count = tokenize(buffer, &tokens);
-  /*for(int i = 0; i < tokens_count; i++) {
-    switch(tokens[i].type) {
-    case PREPR:
-      printf("PREPR(%s)\n", tokens[i].text);
-      break;
-    case ARRITH:
-      printf("ARRITH(%s)\n", tokens[i].text);
-      break;
-    case NUMBER:
-      printf("NUMBER(%s)\n", tokens[i].text);
-      break;
-    case NUMBER_HEX:
-      printf("NUMBER_HEX(%s)\n", tokens[i].text);
-      break;
-    case STRING:
-      printf("STRING(%s)\n", tokens[i].text);
-      break;
-    case LABEL:
-      printf("LABEL(%s)\n", tokens[i].text);
-      break;
-    case FUNC:
-      printf("FUNC(%s)\n", tokens[i].text);
-      break;
-    case IF:
-      printf("IF\n");
-      break;
-    case ELSE:
-      printf("ELSE\n");
-      break;
-    case WHILE:
-      printf("WHILE(%s)\n", tokens[i].text);
-      break;
-    case SCOPE_OPEN:
-      printf("SCOPE_OPEN\n");
-      break;
-    case SCOPE_CLOSE: 
-      printf("SCOPE_CLOSE\n");
-      break;
-    case ARG_OPEN:
-      printf("ARG_OPEN\n");
-      break;
-    case ARG_CLOSE:
-      printf("ARG_CLOSE\n");
-      break;
-    case LET:
-      printf("LET(%s)\n",tokens[i].text);
-      break;
-    case STMT_SEP:
-      printf("STMT_SEP\n");
-      break;
-    case VAR_SEP:
-      printf("VAR_SEP\n");
-      break;
-    case ASSING:
-      printf("ASSIGN\n");
-      break;
-    default:
-      break;
-    }
-  }*/
+  
 
   tree_scope *root_scope = (tree_scope*) malloc(sizeof(tree_scope));
   root_scope->statements = malloc(0);
