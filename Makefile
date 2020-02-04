@@ -45,9 +45,11 @@ OBJS_DASM=$(SRCS_DASM:.c=.o)
 SYSOBJS=$(SYSSRCS:.s=.o65)
 #SYSOBJS_C=$(SYSSRCS_C:.c=.o65)
 
-all:$(TARGET_NEMU) $(TARGET_ASM) $(TARGET_DASM) $(SYSOBJS) #$(SYSOBJS_C)
+all: create_bin $(TARGET_NEMU) $(TARGET_ASM) $(TARGET_DASM) $(SYSOBJS) #$(SYSOBJS_C)
 	cp $(SYSOBJS) src/system/*.tbl ./bin
 
+create_bin:
+	mkdir -p bin
 
 $(TARGET_NEMU):$(OBJS_NEMU)
 	$(CC) $(CFLAGS) $(NEMU_CFLAGS) -o $@ $^
