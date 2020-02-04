@@ -50,9 +50,9 @@ typedef struct s_ps2_encoding ps2_encoding;
 
 static int scancodes_size = 101;
 static ps2_scancode scancodes[101] = {
-  { "NULL", 0x00, 0xF000 }, // nonstandard character used if invalid character
+  { "NULL", 0x00, 0xF000 }, // nonstandard key used if invalid character
                             // is received
-  { " ", 0x52, 0xF052 },           { "1", 0x16, 0xF016 },
+  { " ", 0x29, 0xF029 },           { "1", 0x16, 0xF016 },
   { "2", 0x1E, 0xF01E },           { "3", 0x26, 0xF026 },
   { "4", 0x25, 0xF025 },           { "5", 0x2E, 0xF02E },
   { "6", 0x36, 0xF036 },           { "7", 0x3D, 0xF03D },
@@ -86,7 +86,7 @@ static ps2_scancode scancodes[101] = {
   { "F10", 0x09, 0xF009 },         { "F11", 0x78, 0xF078 },
   { "F12", 0x07, 0xF007 },         { "Shift (Right)", 0x59, 0xF059 },
   { "Ctrl (Left)", 0x14, 0xF014 }, { "Alt (Left)", 0x11, 0xF011 },
-  { "Spacebar", 0x29, 0xF029 },
+  { "Spacebar", 0x29, 0xF029 },    { "'", 0x52, 0xF052 }
   /*{"Alt (right)", 0xE011, 0xE0F011},
   {"Windows (right)", 0xE027, 0xE0F027},
   {"Menus", 0xE02F, 0xE0F02F},
