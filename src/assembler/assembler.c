@@ -146,7 +146,7 @@ main(int argc, char** argv)
         if (strcmp(pseudo_op, ".pc") == 0) {
           int new_program_counter = parse_number(str_sep(&line, ' '), absolute);
           if(new_program_counter < program_counter) {
-            printf("Program Counter Error: Can't set new program counter lower than current program counter.");
+            printf("Program Counter Error: Can't set new program counter lower than current program counter. \nnew: %d / old: %d\n",new_program_counter,program_counter);
             return -1;
           }
           program_counter = new_program_counter;
