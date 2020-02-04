@@ -172,6 +172,6 @@ str_sep(char** src, char delim)
   if (*src[0] != '\0') {
     (*src)++;
   }
-  buffer = realloc(buffer, (strlen(buffer) + 1) * sizeof(char));
+  buffer = (char*) realloc(buffer, (strlen(buffer) + 1) * sizeof(char));
   return buffer;
 }
