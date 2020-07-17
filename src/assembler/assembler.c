@@ -88,6 +88,8 @@ main(int argc, char** argv)
   size_t assembly_code_size =
     readfile(&assembly_code, assembly_code_filename, false);
 
+  int arb_index = 0;
+  
   uint32_t program_counter = 0;
   uint16_t pc_offset = 0;
   bool pc_offset_set = false;
@@ -143,7 +145,7 @@ main(int argc, char** argv)
         break;
       case pseudoop:
         pseudo_op = str_sep(&line, ' ');
-        if (strcmp(pseudo_op, ".pc") == 0) {
+        if (strcmp(pseudo_op, ".pc") == 0 || strcmp(pseudo_op, ".org") == 0) {
           int new_program_counter = parse_number(str_sep(&line, ' '), absolute);
           if(new_program_counter < program_counter) {
             printf("Program Counter Error: Can't set new program counter lower than current program counter. \nnew: %d / old: %d\n",new_program_counter,program_counter);
@@ -155,14 +157,19 @@ main(int argc, char** argv)
             pc_offset_set = true;
           }
         } else if (strcmp(pseudo_op, ".byte") == 0) {
+	  buffer = (uint8_t*) realloc(buffer, (program_counter + 1) * sizeof(uint8_t) ); 
           buffer[program_counter] = parse_number(line, zeropage) & 0x00ff;
           program_counter++;
         } else if (strcmp(pseudo_op, ".word") == 0) {
-          buffer[program_counter] = (parse_number(line, absolute) & 0x00ff);
+          buffer = (uint8_t*) realloc(buffer, (program_counter + 2) * sizeof(uint8_t) );buffer[program_counter] = (parse_number(line, absolute) & 0x00ff);
           buffer[program_counter + 1] =
             (parse_number(line, absolute) & 0xff00) >> 8;
           program_counter += 2;
-        }
+        } else if (strcmp(pseudo_op, ".str") == 0) {
+	  for (arb_index = 1; arb_index < strlen(line) - 1; arb_index++) {  
+	    buffer[program_counter++] = line[arb_index];
+	  }
+	}
         break;
       case lbl:
         add_label(line, program_counter, true);
